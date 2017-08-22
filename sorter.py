@@ -24,6 +24,8 @@ def listToDatetime(timeList):
 
 def datetimeFromFile(filename):
     timeList = getDatetimeList(filename)
+    if not timeList:
+        raise ValueError("can't get datetime from " + filename)
     newDate = listToDatetime(timeList)
     return newDate
 
@@ -40,26 +42,26 @@ def getDatetimeList(filename):
     matched = False
 
     #special case for files i've named myself
-    match = re.match(r"([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", filename)
+    match = re.search(r"([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", filename)
     if match and not matched:
         matched = True
         date = [match.group(n) for n in range(3,0,-1)]
         for n in [4, 5]:
             date.append(match.group(n))      #adds hour and date
         date = fix12hList(date, match)
-        print("debug: " + filename + " " + str(date))
     else:
         regex = [
             r"VID(2[0-1]\d\d)([0-1]\d)([0-3]\d)([0-2]\d)([0-5]\d)(\d\d)",
             r"(2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
             r"j (2[0-1]\d\d)-([0-1]\d)-([0-3]\d) ([0-2]\d)-([0-5]\d)-(\d\d)",
             r"J (2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
-            r"(2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)"
+            r"j (2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
         ]
         for r in regex:
-            match = re.match(r, filename)
+            match = re.search(r, filename)
             if match and not matched:
                 matched = True
+                print(filename)
                 date = [match.group(n) for n in range(1,6)]
     return date
 
@@ -95,6 +97,16 @@ def relocateFile(oldDir, newDir, filename):
         copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     print("done!")
 
+def renameFile(dir, filename, filenameNew):
+    dirFull = thisScriptPath() + "/" + dir
+    if not os.path.exists(dirFull):
+        print("Directory /" + dir + " doesn't exist, creating it... ", end=" ")
+        os.makedirs(dirFull)
+        print("done!")
+    print("Renaming file " + filename + "...", end=" ")
+    move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
+    print("done!")
+
 def compileTags(args):
     print("Compiling all tag files into one big file...")
 
@@ -114,18 +126,46 @@ def getOrderedFiles(files):
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
+def getSortedFilename(count, filename):
+    filenameNew = str(count) + " - "
+    fileTime = datetimeFromFile(filename)
+    print("crash: " + str(fileTime))
+    filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower()
+    return filenameNew
+
+def formatNewFiles(orderedFiles, path):
+    print("files: " + str(orderedFiles))
+    count = 0
+    for f in orderedFiles:
+        count += 1
+        filenameNew = ""
+        match = re.search(r"^([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
+        if match:
+            filenameNew = str(count) + " - " + f    #it will already be in that format
+        else:
+            filenameNew = getSortedFilename(count, f)
+        renameFile(path, f, filenameNew)
+        '''match = re.search(r"^(\d?\d) - ([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
+        if match:
+            start = 3 + len(match.group(1))
+            filenameNew = f[start:]
+            filenameNew = str(count) + " - " + filenameNew
+            print(filenameNew)'''
+
 def sortTimeRecurse(path):
-    print(path)
+    count = 0
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
     fileList = []
     for f in folderContents:
         if os.path.isdir(fullPath + f):
-            sortTimeRecurse(path + "/" + f)
+            count += sortTimeRecurse(path + "/" + f)
         else:
             fileList.append(f)
-    orderedFiles = getOrderedFiles(fileList)
-    
+    if fileList:
+        orderedFiles = getOrderedFiles(fileList)
+        formatNewFiles(orderedFiles, path + "/")
+    return count
 
 def sortDates(args):
     print("Relocating files based on date...")
@@ -137,10 +177,13 @@ def sortDates(args):
         os.makedirs(unsortedDir)
     for f in os.listdir(unsortedDir):
         date = getDatetimeList(f)
-        date = padListWithZeros(date)
-        path = "".join(str(e) + "/" for e in date[0:3])
-        relocateFile("/Unsorted", path, f)
-        filesSorted += 1
+        if date:
+            date = padListWithZeros(date)
+            path = "".join(str(e) + "/" for e in date[0:3])
+            relocateFile("/Unsorted", path, f)
+            filesSorted += 1
+        else:
+            print(f + " is not a journal file, skipping...")
     if (filesSorted > 0):
         print("Relocating done! " + str(filesSorted) + " files sorted.")
     else:
@@ -153,7 +196,7 @@ def sortTimes(args):
 
     yearFolders = getYearList(os.listdir(thisScriptPath()))
     for i in yearFolders:
-        sortTimeRecurse(i)
+        filesSorted = sortTimeRecurse(i)
     if filesSorted > 0:
         print("Renaming done! " + str(filesSorted) + " files renamed")
     else:
