@@ -23,7 +23,6 @@ def listToDatetime(timeList):
     return newDate
 
 def datetimeFromFile(filename):
-    print(filename)
     timeList = getDatetimeList(filename)
     newDate = listToDatetime(timeList)
     return newDate
@@ -84,16 +83,17 @@ def getYearList(yearStrList):
 def relocateFile(oldDir, newDir, filename):
     oldDirFull = thisScriptPath() + "/" + oldDir
     newDirFull = thisScriptPath() + "/" + newDir
-    if not os.path.exists(oldDirFull):
+    if not os.path.exists(newDirFull):
         print("Directory /" + newDir + " doesn't exist, creating it... ", end=" ")
         os.makedirs(newDirFull)
         print("done!")
     if args.move:
-        print("Moving file " + f + "...", end=" ")
-        move(oldDirFull + "/" + f, newDirFull + "/" + f)
+        print("Moving file " + filename + "...", end=" ")
+        move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     else:
-        print("Copying file " + f + "...", end=" ")
-        copyfile(oldDirFull + "/" + f, newDirFull + "/" + f)
+        print("Copying file " + filename + "...", end=" ")
+        copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
+    print("done!")
 
 def compileTags(args):
     print("Compiling all tag files into one big file...")
@@ -139,8 +139,7 @@ def sortDates(args):
         date = getDatetimeList(f)
         date = padListWithZeros(date)
         path = "".join(str(e) + "/" for e in date[0:3])
-        relocateFile(unsortedDir, thisScriptPath() + "/" + path, f)
-        print("done!")
+        relocateFile("/Unsorted", path, f)
         filesSorted += 1
     if (filesSorted > 0):
         print("Relocating done! " + str(filesSorted) + " files sorted.")
