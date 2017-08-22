@@ -4,6 +4,7 @@ import time
 import sys
 import re
 from shutil import copytree, copyfile, move
+import datetime
 
 def thisScriptPath():
     return os.path.dirname(os.path.realpath(__file__))
@@ -16,7 +17,26 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
-def getDatetimeFromFile(filename):
+def listToDatetime(timeList):
+    intList = map(int, timeList)
+    newDate = datetime.datetime(*intList)
+    return newDate
+
+def datetimeFromFile(filename):
+    print(filename)
+    timeList = getDatetimeList(filename)
+    newDate = listToDatetime(timeList)
+    return newDate
+
+def fix12hList(date, match):
+    if (match.group(6) == "pm") and (date[3] < "12"):
+        date[3] = str(int(date[3]) + 12)       #converts 1pm-11pm to 24 hour format
+    elif date[3] == "12":
+        date[3] = "0"   #change 12am to 24hour format
+    date[0] = "20" + date[0]    #convert year to 20xx format
+    return date
+
+def getDatetimeList(filename):
     date = []
     matched = False
 
@@ -27,11 +47,7 @@ def getDatetimeFromFile(filename):
         date = [match.group(n) for n in range(3,0,-1)]
         for n in [4, 5]:
             date.append(match.group(n))      #adds hour and date
-        if (match.group(6) == "pm") and (date[3] < "12"):
-            date[3] = str(int(date[3]) + 12)       #converts 1pm-11pm to 24 hour format
-        elif date[3] == "12":
-            date[3] = "0"   #change 12am to 24hour format
-        date[0] = "20" + date[0]    #convert year to 20xx format
+        date = fix12hList(date, match)
         print("debug: " + filename + " " + str(date))
     else:
         regex = [
@@ -65,6 +81,20 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
+def relocateFile(oldDir, newDir, filename):
+    oldDirFull = thisScriptPath() + "/" + oldDir
+    newDirFull = thisScriptPath() + "/" + newDir
+    if not os.path.exists(oldDirFull):
+        print("Directory /" + newDir + " doesn't exist, creating it... ", end=" ")
+        os.makedirs(newDirFull)
+        print("done!")
+    if args.move:
+        print("Moving file " + f + "...", end=" ")
+        move(oldDirFull + "/" + f, newDirFull + "/" + f)
+    else:
+        print("Copying file " + f + "...", end=" ")
+        copyfile(oldDirFull + "/" + f, newDirFull + "/" + f)
+
 def compileTags(args):
     print("Compiling all tag files into one big file...")
 
@@ -80,14 +110,13 @@ def getOrderedFiles(files):
     for i in files:  #sorting files in filePath based on time
         fileTime = None
         fileName = os.path.splitext(i)[0]
-        
-        dictFiles[i] = GetTimeFromName(fileName, True)
+        dictFiles[i] = datetimeFromFile(fileName)
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
 def sortTimeRecurse(path):
     print(path)
-    fullPath = thisScriptsPath + "/" + path + "/"
+    fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
     fileList = []
     for f in folderContents:
@@ -107,19 +136,10 @@ def sortDates(args):
     if not os.path.exists(unsortedDir):
         os.makedirs(unsortedDir)
     for f in os.listdir(unsortedDir):
-        date = getDatetimeFromFile(f)
+        date = getDatetimeList(f)
         date = padListWithZeros(date)
         path = "".join(str(e) + "/" for e in date[0:3])
-        if not os.path.exists(thisScriptPath() + "/" + path):
-            print("Directory /" + path + " doesn't exist, creating it... ", end=" ")
-            os.makedirs(thisScriptPath() + "/" + path)
-            print("done!")
-        if args.move:
-            print("Moving file " + f + "...", end=" ")
-            move(unsortedDir + "/" + f, thisScriptPath() + "/" + path + "/" + f)
-        else:
-            print("Copying file " + f + "...", end=" ")
-            copyfile(unsortedDir + "/" + f, thisScriptPath() + "/" + path + "/" + f)
+        relocateFile(unsortedDir, thisScriptPath() + "/" + path, f)
         print("done!")
         filesSorted += 1
     if (filesSorted > 0):
