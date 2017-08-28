@@ -27,16 +27,18 @@ def isFileAlreadyHere(filename, path):
     alreadyHere = False
 
     scriptPath = thisScriptPath()
-    fullPath = scriptPath + "/" + path
-    fileSize = os.path.getsize(fullPath + "/" + filename)
+    fullPath = scriptPath + "/" + path + "/"
+    fileSize = os.path.getsize(scriptPath + filename)
 
-    folderContents = os.listdir(fullPath)
-    for f in folderContents:
-        if not os.path.isdir(fullPath + f):
-            thisFileSize = os.path.getsize(fullPath + "/" + f)
-            if fileSize == thisFileSize:
-                alreadyHere = True
-    
+    if os.path.isdir(fullPath):
+        folderContents = os.listdir(fullPath)
+        for f in folderContents:
+            if not alreadyHere and os.path.isfile(fullPath + f):
+                thisFileSize = os.path.getsize(fullPath + f)
+                fileDatetime = datetimeFromFilename(scriptPath + filename)
+                thisFileDatetime = datetimeFromFilename(fullPath + f)
+                if fileSize == thisFileSize and fileDatetime == thisFileDatetime:
+                    alreadyHere = True
     return alreadyHere
 
 def datetimeFromFilename(filenameFull):
@@ -192,9 +194,11 @@ def sortDates(args):
         date = datetimeFromFilename(f)
         if date:
             path = date.strftime("%Y/%m/%d")
-            if not isFileAlreadyHere(f, path):
-                relocateFile("/Unsorted", path, f)
+            if not isFileAlreadyHere("/Unsorted/" + f, path):
+                relocateFile("/Unsorted", path, f, args.move)
                 filesSorted += 1
+            else:
+                print(f + " is already in its folder.")
         else:
             print(f + " is not a journal file, skipping...")
     if (filesSorted > 0):
