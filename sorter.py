@@ -241,7 +241,7 @@ def get_arguments():
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
-    argParser.add_argument("--finalcopy", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves despite presence of --move''', action="store_true")
+    argParser.add_argument("--finalcopy", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
