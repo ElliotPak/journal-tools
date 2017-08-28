@@ -121,16 +121,16 @@ def getOrderedFiles(files):
     dictFiles = dict()
     for i in files:  #sorting files in filePath based on time
         fileTime = None
-        fileName = os.path.splitext(i)[0]
-        dictFiles[i] = datetimeFromFile(fileName)
+        dictFiles[i] = datetimeFromFile(i)
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
 def getSortedFilename(count, filename):
     filenameNew = str(count) + " - "
     fileTime = datetimeFromFile(filename)
+    extension = os.path.splitext(filename)[1]
     print("crash: " + str(fileTime))
-    filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower()
+    filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower() + extension
     return filenameNew
 
 def formatNewFiles(orderedFiles, path):
@@ -162,6 +162,7 @@ def sortTimeRecurse(path):
             count += sortTimeRecurse(path + "/" + f)
         else:
             fileList.append(f)
+            count += 1
     if fileList:
         orderedFiles = getOrderedFiles(fileList)
         formatNewFiles(orderedFiles, path + "/")
@@ -209,7 +210,8 @@ def get_arguments():
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
-    argParser.add_argument("--finalcopy", help='''After time sorting, copy all sorted files into [script's path]/new''', action="store_true")
+    argParser.add_argument("--finalcopy", help='''After time sorting, copy all sorted files into /JustSorted/[current time]''', action="store_true")
+    argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
@@ -223,3 +225,5 @@ if __name__ == "__main__":
         sortDates(args)
     if args.time or args.all:
         sortTimes(args)
+        if args.finalcopy:
+            finalcopy(args)
