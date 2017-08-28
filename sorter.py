@@ -206,6 +206,21 @@ def sortDates(args):
     else:
         print("No files moved.")
 
+def finalCopy(args):
+    '''
+    Moves all files in /Unsorted into /Raw/[current date] (formatted as
+    DD.MM.YY mm.ss(am/pm))
+    '''
+    scriptPath = thisScriptPath()
+    folderContents = os.listdir(scriptPath + "/Unsorted")
+    rawFolder = scriptPath + "/Raw/" + datetime.datetime.now().strftime("%d.%m.%y %I.%M.%S%p").lower()
+    
+    if not os.path.isdir(rawFolder):
+        os.makedirs(rawFolder)
+    for f in folderContents:
+        move(scriptPath + "/Unsorted/" + f, rawFolder)
+
+
 def sortTimes(args):
     print("Renaming files based on time...")
 
@@ -226,7 +241,7 @@ def get_arguments():
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
-    argParser.add_argument("--finalcopy", help='''After time sorting, copy all sorted files into /JustSorted/[current time]''', action="store_true")
+    argParser.add_argument("--finalcopy", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves despite presence of --move''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
@@ -239,7 +254,7 @@ if __name__ == "__main__":
         compileTags(args)
     if args.date or args.all:
         sortDates(args)
+        if args.finalcopy:
+            finalCopy(args)
     if args.time or args.all:
         sortTimes(args)
-        if args.finalcopy:
-            finalcopy(args)
