@@ -17,17 +17,6 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
-def isFileAlreadyHere(filename, path):
-    scriptPath = thisScriptPath()
-    fullPath = scriptPath + "/" + path
-
-    thisFileSize = os.path.getsize(fullPath + "/" + filename)
-
-    folderContents = os.listdir(fullPath)
-    for f in folderContents:
-        if not os.path.isdir(fullPath + f):
-            
-
 def datetimeFromFilename(filenameFull):
     found = False
     thisDatetime = None
@@ -106,12 +95,10 @@ def getSortedFilename(count, filename):
     filenameNew = str(count) + " - "
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
-    print("crash: " + str(fileTime))
     filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower() + extension
     return filenameNew
 
 def formatNewFiles(orderedFiles, path):
-    print("files: " + str(orderedFiles))
     count = 0
     for f in orderedFiles:
         count += 1
@@ -122,12 +109,6 @@ def formatNewFiles(orderedFiles, path):
         else:
             filenameNew = getSortedFilename(count, f)
         renameFile(path, f, filenameNew)
-        '''match = re.search(r"^(\d?\d) - ([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
-        if match:
-            start = 3 + len(match.group(1))
-            filenameNew = f[start:]
-            filenameNew = str(count) + " - " + filenameNew
-            print(filenameNew)'''
 
 def sortTimeRecurse(path):
     count = 0
