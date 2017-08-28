@@ -7,6 +7,9 @@ from shutil import copytree, copyfile, move
 import datetime
 
 def thisScriptPath():
+    '''
+    Returns the path of the script
+    '''
     return os.path.dirname(os.path.realpath(__file__))
 
 def getYearList(yearStrList):
@@ -18,6 +21,9 @@ def getYearList(yearStrList):
     return newYearList
 
 def datetimeFromFilename(filenameFull):
+    '''
+    Attempts to extract time from filename, based on some preset patterns.
+    '''
     found = False
     thisDatetime = None
     filename = os.path.splitext(filenameFull)[0]
@@ -44,14 +50,18 @@ def datetimeFromFilename(filenameFull):
                 pass
     return thisDatetime
 
-def relocateFile(oldDir, newDir, filename):
+def relocateFile(oldDir, newDir, filename, shouldMove):
+    '''
+    Either moves or copies (based on shouldMove) file from newDir to oldDir. 
+    Also creates newDir if it doesn't exist.
+    '''
     oldDirFull = thisScriptPath() + "/" + oldDir
     newDirFull = thisScriptPath() + "/" + newDir
     if not os.path.exists(newDirFull):
         print("Directory /" + newDir + " doesn't exist, creating it... ", end=" ")
         os.makedirs(newDirFull)
         print("done!")
-    if args.move:
+    if shouldMove:
         print("Moving file " + filename + "...", end=" ")
         move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     else:
@@ -60,6 +70,9 @@ def relocateFile(oldDir, newDir, filename):
     print("done!")
 
 def renameFile(dir, filename, filenameNew):
+    '''
+    Attempts to rename filename to filenameNew
+    '''
     dirFull = thisScriptPath() + "/" + dir
     if not os.path.exists(dirFull):
         print("Directory /" + dir + " doesn't exist, creating it... ", end=" ")
@@ -80,6 +93,10 @@ def compileTags(args):
         print("No tag files compiled.")
 
 def getOrderedFiles(files):
+    '''
+    Sorts the contents of the list "files" based on the datetime in each entry. 
+    Datetime is figured out with datetimeFromFilename()
+    '''
     dictFiles = dict()
     for i in files:  #sorting files in filePath based on time
         fileTime = None
@@ -92,6 +109,9 @@ def getOrderedFiles(files):
     return sortedList
 
 def getSortedFilename(count, filename):
+    '''
+    
+    '''
     filenameNew = str(count) + " - "
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
@@ -99,6 +119,10 @@ def getSortedFilename(count, filename):
     return filenameNew
 
 def formatNewFiles(orderedFiles, path):
+    '''
+    Renames all files in orderedFiles to their sorted filename. 
+    Sorted filename comes from getSortedFilename()
+    '''
     count = 0
     for f in orderedFiles:
         count += 1
@@ -111,6 +135,12 @@ def formatNewFiles(orderedFiles, path):
         renameFile(path, f, filenameNew)
 
 def sortTimeRecurse(path):
+    '''
+    Runs through all files in "path" and renames them based on the file time
+    that is retrieved through its name. 
+    Also calls itself on all folders in path. 
+    Returns the amount of files sorted.  
+    '''
     count = 0
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
@@ -127,6 +157,11 @@ def sortTimeRecurse(path):
     return count
 
 def sortDates(args):
+    '''
+    Moves (or copies) all files in /Unsorted to folders based on the date in
+    its filename. Folders are in YYYY/MM/DD format. 
+    '''
+
     print("Relocating files based on date...")
 
     unsortedDir = thisScriptPath() + "/Unsorted"
