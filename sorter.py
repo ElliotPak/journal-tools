@@ -1,6 +1,5 @@
 import argparse
 import os
-import time
 import sys
 import re
 from shutil import copytree, copyfile, move
