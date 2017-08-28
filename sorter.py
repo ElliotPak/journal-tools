@@ -17,70 +17,34 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
-def listToDatetime(timeList):
-    intList = map(int, timeList)
-    newDate = datetime.datetime(*intList)
-    return newDate
-
-def datetimeFromFile(filename):
-    timeList = getDatetimeList(filename)
-    if not timeList:
-        raise ValueError("can't get datetime from " + filename)
-    newDate = listToDatetime(timeList)
-    return newDate
-
-def fix12hList(date, match):
-    if (match.group(6) == "pm") and (date[3] < "12"):
-        date[3] = str(int(date[3]) + 12)       #converts 1pm-11pm to 24 hour format
-    elif date[3] == "12":
-        date[3] = "0"   #change 12am to 24hour format
-    date[0] = "20" + date[0]    #convert year to 20xx format
-    return date
-
-def getDatetimeList(filename):
-    date = []
-    matched = False
-
-    #special case for files i've named myself
+def datetimeFromFilename(filenameFull):
+    found = False
+    thisDatetime = None
+    filename = os.path.splitext(filenameFull)[0]
     match = re.search(r"([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", filename)
-    if match and not matched:
-        matched = True
-        date = [match.group(n) for n in range(3,0,-1)]
-        for n in [4, 5]:
-            date.append(match.group(n))      #adds hour and date
-        date = fix12hList(date, match)
-    else:
-        regex = [
-            r"VID(2[0-1]\d\d)([0-1]\d)([0-3]\d)([0-2]\d)([0-5]\d)(\d\d)",
-            r"(2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
-            r"j (2[0-1]\d\d)-([0-1]\d)-([0-3]\d) ([0-2]\d)-([0-5]\d)-(\d\d)",
-            r"J (2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
-            r"j (2[0-1]\d\d)_([0-1]\d)_([0-3]\d)_([0-2]\d)_([0-5]\d)_(\d\d)",
-        ]
-        for r in regex:
-            match = re.search(r, filename)
-            if match and not matched:
-                matched = True
-                print(filename)
-                date = [match.group(n) for n in range(1,6)]
-    return date
+    if match:
+        found = True
+        thisDatetime = datetime.datetime.strptime(match.group(0), "%d.%m.%y %I.%M%p")
+    formats = [
+        "VID%Y%m%d%H%M%S",
+        "%Y_%m_%d_%H_%M_%S",
+        "%j Y-%m-%d %H-%M-%S",
+        "%J Y_%m_%d_%H_%M_%S",
+        "%j Y_%m_%d_%H_%M_%S",
+        "%d.%m.%y %I.%M%p",
+        "%Y%m%d%H%M%S",
+        "%Y-%m-%d %H-%M-%S"
+    ]
+    for f in formats:
+        if not found:
+            try:
+                thisDatetime = datetime.datetime.strptime(filename, f)
+                found = True
+            except ValueError:
+                pass
+    return thisDatetime
 
-def padListWithZeros(list):
-    newList = []
-    for l in list:
-        if len(l) == 1:
-            newList.append("0" + l)
-        else:
-            newList.append(l)
-    return newList
-
-def getYearList(yearStrList):
-    #returns every string in yearStrList that is a valid 4-digit integer
-    newYearList = [];
-    for i in yearStrList:
-        if len(i) == 4 and i.isdigit():
-            newYearList.append(i)
-    return newYearList
+print(datetimeFromFilename("VID20170303030303"))
 
 def relocateFile(oldDir, newDir, filename):
     oldDirFull = thisScriptPath() + "/" + oldDir
@@ -121,13 +85,17 @@ def getOrderedFiles(files):
     dictFiles = dict()
     for i in files:  #sorting files in filePath based on time
         fileTime = None
-        dictFiles[i] = datetimeFromFile(i)
+        thisDatetime = datetimeFromFilename(i)
+        if thisDatetime:
+            dictFiles[i] = thisDatetime
+        else:
+            print(i + " isn't a valid journal file, can't sort by time.")
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
 def getSortedFilename(count, filename):
     filenameNew = str(count) + " - "
-    fileTime = datetimeFromFile(filename)
+    fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
     print("crash: " + str(fileTime))
     filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower() + extension
@@ -177,10 +145,9 @@ def sortDates(args):
     if not os.path.exists(unsortedDir):
         os.makedirs(unsortedDir)
     for f in os.listdir(unsortedDir):
-        date = getDatetimeList(f)
+        date = datetimeFromFilename(f)
         if date:
-            date = padListWithZeros(date)
-            path = "".join(str(e) + "/" for e in date[0:3])
+            path = date.strftime("%Y/%m/%d")
             relocateFile("/Unsorted", path, f)
             filesSorted += 1
         else:
