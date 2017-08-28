@@ -20,6 +20,25 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
+def isFileAlreadyHere(filename, path):
+    '''
+    Returns true if any file in "path" has the same file size as "filename".
+    '''
+    alreadyHere = False
+
+    scriptPath = thisScriptPath()
+    fullPath = scriptPath + "/" + path
+    fileSize = os.path.getsize(fullPath + "/" + filename)
+
+    folderContents = os.listdir(fullPath)
+    for f in folderContents:
+        if not os.path.isdir(fullPath + f):
+            thisFileSize = os.path.getsize(fullPath + "/" + f)
+            if fileSize == thisFileSize:
+                alreadyHere = True
+    
+    return alreadyHere
+
 def datetimeFromFilename(filenameFull):
     '''
     Attempts to extract time from filename, based on some preset patterns.
@@ -173,8 +192,9 @@ def sortDates(args):
         date = datetimeFromFilename(f)
         if date:
             path = date.strftime("%Y/%m/%d")
-            relocateFile("/Unsorted", path, f)
-            filesSorted += 1
+            if not isFileAlreadyHere(f, path):
+                relocateFile("/Unsorted", path, f)
+                filesSorted += 1
         else:
             print(f + " is not a journal file, skipping...")
     if (filesSorted > 0):
