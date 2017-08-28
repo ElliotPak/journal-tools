@@ -17,6 +17,17 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
+def isFileAlreadyHere(filename, path):
+    scriptPath = thisScriptPath()
+    fullPath = scriptPath + "/" + path
+
+    thisFileSize = os.path.getsize(fullPath + "/" + filename)
+
+    folderContents = os.listdir(fullPath)
+    for f in folderContents:
+        if not os.path.isdir(fullPath + f):
+            
+
 def datetimeFromFilename(filenameFull):
     found = False
     thisDatetime = None
@@ -43,8 +54,6 @@ def datetimeFromFilename(filenameFull):
             except ValueError:
                 pass
     return thisDatetime
-
-print(datetimeFromFilename("VID20170303030303"))
 
 def relocateFile(oldDir, newDir, filename):
     oldDirFull = thisScriptPath() + "/" + oldDir
