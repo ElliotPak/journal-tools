@@ -70,12 +70,19 @@ def datetimeFromFilename(filenameFull):
     found = False
     thisDatetime = None
     filename = os.path.splitext(filenameFull)[0]
-    match = re.search(r"([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", filename)
-    if match:
-        found = True
-        thisDatetime = datetime.datetime.strptime(match.group(0), "%d.%m.%y %I.%M%p")
+    toRegexSearch = {
+        "%d.%m.%y %I.%M%p": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)",
+        "%d.%m.%y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d)",
+        "%d %m %Y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"
+    }
+    for ii, jj in toRegexSearch.items():
+        match = re.search(jj, filename)
+        if match:
+            found = True
+            thisDatetime = datetime.datetime.strptime(match.group(0), ii)
     formats = [
         "VID%Y%m%d%H%M%S",
+        "IMG%Y%m%d%H%M%S",
         "%Y_%m_%d_%H_%M_%S",
         "j %Y-%m-%d %H-%M-%S",
         "J %Y_%m_%d_%H_%M_%S",
