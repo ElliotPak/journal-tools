@@ -7,6 +7,13 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom
 from shutil import copytree, copyfile, move
 
+args = None     #command line arguments
+
+def printStatus(text, whenQuiet, textEnd="\n"):
+    if not args.silent:
+        if not args.quiet or whenQuiet:
+            print(text, end=textEnd)
+
 def thisScriptPath():
     '''
     Returns the path of the script
@@ -72,7 +79,7 @@ def datetimeFromFilename(filenameFull):
                 pass
     return thisDatetime
 
-def relocateFile(oldDir, newDir, filename, shouldMove):
+def relocateFile(oldDir, newDir, filename):
     '''
     Either moves or copies (based on shouldMove) file from newDir to oldDir. 
     Also creates newDir if it doesn't exist.
@@ -80,16 +87,16 @@ def relocateFile(oldDir, newDir, filename, shouldMove):
     oldDirFull = thisScriptPath() + "/" + oldDir
     newDirFull = thisScriptPath() + "/" + newDir
     if not os.path.exists(newDirFull):
-        print("Directory /" + newDir + " doesn't exist, creating it... ", end=" ")
+        printStatus("Directory /" + newDir + " doesn't exist, creating it... ", False, " ")
         os.makedirs(newDirFull)
-        print("done!")
-    if shouldMove:
-        print("Moving file " + filename + "...", end=" ")
+        printStatus("done!", False)
+    if args.move:
+        printStatus("Moving file " + filename + "...", False, " ")
         move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     else:
-        print("Copying file " + filename + "...", end=" ")
+        printStatus("Copying file " + filename + "...", False, " ")
         copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
-    print("done!")
+    printStatus("done!", False)
 
 def renameFile(dir, filename, filenameNew):
     '''
@@ -97,12 +104,12 @@ def renameFile(dir, filename, filenameNew):
     '''
     dirFull = thisScriptPath() + "/" + dir
     if not os.path.exists(dirFull):
-        print("Directory /" + dir + " doesn't exist, creating it... ", end=" ")
+        printStatus("Directory /" + dir + " doesn't exist, creating it... ", False, " ")
         os.makedirs(dirFull)
-        print("done!")
-    print("Renaming file " + filename + "...", end=" ")
+        printStatus("done!", False)
+    printStatus("Renaming file " + filename + "...", False, " ")
     move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
-    print("done!")
+    printStatus("done!", False)
 
 def getOrderedFiles(files):
     '''
@@ -116,7 +123,7 @@ def getOrderedFiles(files):
         if thisDatetime:
             dictFiles[i] = thisDatetime
         else:
-            print(i + " isn't a valid journal file, can't sort by time.")
+            printStatus(i + " isn't a valid journal file, can't sort by time.", False)
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
@@ -167,13 +174,13 @@ def sortTimeRecurse(path):
         formatNewFiles(orderedFiles, path + "/")
     return count
 
-def sortDates(args):
+def sortDates():
     '''
     Moves (or copies) all files in /Unsorted to folders based on the date in
     its filename. Folders are in YYYY/MM/DD format. 
     '''
 
-    print("Relocating files based on date...")
+    printStatus("Relocating files based on date...", True)
 
     unsortedDir = thisScriptPath() + "/Unsorted"
     filesSorted = 0
@@ -185,18 +192,18 @@ def sortDates(args):
         if date:
             path = date.strftime("%Y/%m/%d")
             if not isFileAlreadyHere("/Unsorted/" + f, path):
-                relocateFile("/Unsorted", path, f, args.move)
+                relocateFile("/Unsorted", path, f)
                 filesSorted += 1
             else:
-                print(f + " is already in its folder.")
+                printStatus(f + " is already in its folder.", False)
         else:
-            print(f + " is not a journal file, skipping...")
+            printStatus(f + " is not a journal file, skipping...", False)
     if (filesSorted > 0):
-        print("Relocating done! " + str(filesSorted) + " files sorted.")
+        printStatus("Relocating done! " + str(filesSorted) + " files sorted.", True)
     else:
-        print("No files moved.")
+        printStatus("No files moved.", True)
 
-def finalCopy(args):
+def finalMove():
     '''
     Moves all files in /Unsorted into /Raw/[current date] (formatted as
     DD.MM.YY mm.ss(am/pm))
@@ -211,8 +218,8 @@ def finalCopy(args):
         move(scriptPath + "/Unsorted/" + f, rawFolder)
 
 
-def sortTimes(args):
-    print("Renaming files based on time...")
+def sortTimes():
+    printStatus("Renaming files based on time...", True)
 
     filesSorted = 0
 
@@ -220,9 +227,9 @@ def sortTimes(args):
     for i in yearFolders:
         filesSorted = sortTimeRecurse(i)
     if filesSorted > 0:
-        print("Renaming done! " + str(filesSorted) + " files renamed")
+        printStatus("Renaming done! " + str(filesSorted) + " files renamed", True)
     else:
-        print("No files renamed.")
+        printStatus("No files renamed.", True)
 
 def loadXmlDoc(filename):
     '''
@@ -294,8 +301,8 @@ def prettifyXml(element):
     reparsed = xml.dom.minidom.parseString(roughString)
     return reparsed.toprettyxml(indent="\t")
 
-def compileTags(args):
-    print("Compiling all tag files into one big file...")
+def compileTags():
+    printStatus("Compiling all tag files into one big file...", True)
     tagsCompiled = 0
 
     xmlDoc = loadXmlDoc("tags.xml")
@@ -307,9 +314,9 @@ def compileTags(args):
         f.write(prettified)
     
     if tagsCompiled > 0:
-        print("Tag compiling done! " + str(tagsCompiled) + " files compiled")
+        printStatus("Tag compiling done! " + str(tagsCompiled) + " files compiled", True)
     else:
-        print("No tag files compiled.")
+        printStatus("No tag files compiled.", True)
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
@@ -318,8 +325,11 @@ def get_arguments():
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
-    argParser.add_argument("--finalcopy", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
+    argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
+    argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
+    argParser.add_argument("--silent", help='Display no messages', action="store_true")
+    argParser.add_argument("--verbose", help='''Display each file that was and wasn't acted on''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
@@ -328,10 +338,10 @@ def get_arguments():
 if __name__ == "__main__":
     args = get_arguments()
     if args.date or args.all:
-        sortDates(args)
-        if args.finalcopy:
-            finalCopy(args)
+        sortDates()
+        if args.finalmove:
+            finalMove()
     if args.time or args.all:
-        sortTimes(args)
+        sortTimes()
     if args.compile or args.all:
-        compileTags(args)
+        compileTags()
