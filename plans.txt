@@ -1,5 +1,0 @@
-3 main functions:
-    put unsorted files in date folders 
-    sort each file in a date folder based on time (and make a tag file)
-    compile all tag files into one big file
-
