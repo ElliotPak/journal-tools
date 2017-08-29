@@ -448,7 +448,7 @@ def get_arguments():
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
     argParser.add_argument("--silent", help='Display no messages while anything occurs', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
-    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")
+    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")\
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
