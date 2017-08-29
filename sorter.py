@@ -341,19 +341,23 @@ def get_arguments():
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
     argParser.add_argument("--silent", help='Display no messages', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
-    argParser.add_argument("--verbose", help='''Display each file that was and wasn't acted on''', action="store_true")
+    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
     return args
 
 if __name__ == "__main__":
+    resultsDate = []
+    resultsTime = []
+    resultsCompile = []
+    resultsFinalMove = []
     args = get_arguments()
     if args.date or args.all:
-        sortDates()
+        resultsDate = sortDates()
         if args.finalmove:
-            finalMove()
+            resultsFinalMove = finalMove()
     if args.time or args.all:
-        sortTimes()
+        resultsCompile = sortTimes()
     if args.compile or args.all:
-        compileTags()
+        resultsCompile = compileTags()
