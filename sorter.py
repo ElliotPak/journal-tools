@@ -10,6 +10,11 @@ from shutil import copytree, copyfile, move
 args = None     #command line arguments
 
 def printStatus(text, whenQuiet, textEnd="\n", marker=""):
+    '''
+    prints text. if the --quiet flag is used and whenQuiet is false, text won't
+    be printed. If marker isn't an empty string, it's inserted between square
+    brackets before the text to be printed (won't be if --nomarker is on)
+    '''
     toPrint = ""
     if not args.silent and (not args.quiet or whenQuiet):
         toPrint = text
@@ -26,7 +31,9 @@ def thisScriptPath():
     return os.path.dirname(os.path.realpath(__file__))
 
 def getYearList(yearStrList):
-    #returns every string in yearStrList that is a valid 4-digit number
+    '''
+    returns every string in yearStrList that is a valid 4-digit number
+    '''
     newYearList = [];
     for i in yearStrList:
         if len(i) == 4 and i.isdigit():
@@ -105,7 +112,7 @@ def relocateFile(oldDir, newDir, filename):
 
 def renameFile(dir, filename, filenameNew):
     '''
-    Attempts to rename filename to filenameNew
+    Attempts to rename dir/filename to dir/filenameNew (so it's essentially a move)
     '''
     dirFull = thisScriptPath() + "/" + dir
     if not os.path.exists(dirFull):
@@ -134,7 +141,8 @@ def getOrderedFiles(files):
 
 def getSortedFilename(count, filename):
     '''
-    
+    gets the datetime from filename, converts it to DD.MM.YY mm.ss(am/pm)
+    format, and renames it to that format. Also adds "count - " to the front
     '''
     filenameNew = str(count) + " - "
     fileTime = datetimeFromFilename(filename)
@@ -179,67 +187,6 @@ def sortTimeRecurse(path):
         formatNewFiles(orderedFiles, path + "/")
     return count
 
-def sortDates():
-    '''
-    Moves (or copies) all files in /Unsorted to folders based on the date in
-    its filename. Folders are in YYYY/MM/DD format. 
-    '''
-
-    printStatus("=================================", True)
-    printStatus("Relocating files based on date...", True)
-    printStatus("=================================", True, "\n\n")
-
-    unsortedDir = thisScriptPath() + "/Unsorted"
-    filesSorted = 0
-
-    if not os.path.exists(unsortedDir):
-        os.makedirs(unsortedDir)
-    for f in os.listdir(unsortedDir):
-        date = datetimeFromFilename(f)
-        if date:
-            path = date.strftime("%Y/%m/%d")
-            if not isFileAlreadyHere("/Unsorted/" + f, path):
-                relocateFile("/Unsorted", path, f)
-                filesSorted += 1
-            else:
-                printStatus(f + " is already in its folder.", False, marker="NoMove")
-        else:
-            printStatus(f + " is not a journal file, skipping...", False)
-    if (filesSorted > 0):
-        printStatus("\nRelocating done! " + str(filesSorted) + " files sorted.", True, "\n\n")
-    else:
-        printStatus("\nNo files moved.", True, "\n\n")
-
-def finalMove():
-    '''
-    Moves all files in /Unsorted into /Raw/[current date] (formatted as
-    DD.MM.YY mm.ss(am/pm))
-    '''
-    scriptPath = thisScriptPath()
-    folderContents = os.listdir(scriptPath + "/Unsorted")
-    rawFolder = scriptPath + "/Raw/" + datetime.datetime.now().strftime("%d.%m.%y %I.%M.%S%p").lower()
-    
-    if not os.path.isdir(rawFolder):
-        os.makedirs(rawFolder)
-    for f in folderContents:
-        move(scriptPath + "/Unsorted/" + f, rawFolder)
-
-
-def sortTimes():
-    printStatus("===============================", True)
-    printStatus("Renaming files based on time...", True)
-    printStatus("===============================", True, "\n\n")
-
-    filesSorted = 0
-
-    yearFolders = getYearList(os.listdir(thisScriptPath()))
-    for i in yearFolders:
-        filesSorted = sortTimeRecurse(i)
-    if filesSorted > 0:
-        printStatus("\nRenaming done! " + str(filesSorted) + " files renamed", True, "\n\n")
-    else:
-        printStatus("\nNo files renamed.", True, "\n\n")
-
 def loadXmlDoc(filename):
     '''
     Attempts to load filename as an xml document and returns the root of the
@@ -265,6 +212,10 @@ def getTag(xmlDoc, tag, name):
     return toReturn
 
 def getFolderNode(xmlDoc, folder):
+    '''
+    gets a Folder node from xmlDoc, named folder. Creates a new one if it
+    doesn't already exist
+    '''
     node = getTag(xmlDoc, "Folder", folder)
     if not node:
         node = ET.SubElement(xmlDoc, "Folder", name=folder)
@@ -304,13 +255,68 @@ def tagCompileRecurse(xmlDoc, folderPath, folder):
 
 def prettifyXml(element):
     '''
-    Converts XML to a beautified format.
+    Converts XML to a beautified format. Might take time (requires re-parsing,
+    sadly ;_;)
     '''
     roughString = ET.tostring(element, 'utf-8')
     reparsed = xml.dom.minidom.parseString(roughString)
     return reparsed.toprettyxml(indent="\t")
 
+def sortDates():
+    '''
+    Moves (or copies) all files in /Unsorted to folders based on the date in
+    its filename. Folders are in YYYY/MM/DD format. 
+    '''
+
+    printStatus("=================================", True)
+    printStatus("Relocating files based on date...", True)
+    printStatus("=================================", True, "\n\n")
+
+    unsortedDir = thisScriptPath() + "/Unsorted"
+    filesSorted = 0
+
+    if not os.path.exists(unsortedDir):
+        os.makedirs(unsortedDir)
+    for f in os.listdir(unsortedDir):
+        date = datetimeFromFilename(f)
+        if date:
+            path = date.strftime("%Y/%m/%d")
+            if not isFileAlreadyHere("/Unsorted/" + f, path):
+                relocateFile("/Unsorted", path, f)
+                filesSorted += 1
+            else:
+                printStatus(f + " is already in its folder.", False, marker="NoMove")
+        else:
+            printStatus(f + " is not a journal file, skipping...", False)
+    if (filesSorted > 0):
+        printStatus("\nRelocating done! " + str(filesSorted) + " files sorted.", True, "\n\n")
+    else:
+        printStatus("\nNo files moved.", True, "\n\n")
+
+
+def sortTimes():
+    '''
+    goes through each year folder (and its subfolders) and renames all files
+    found to be ordered based on the datetime that was already in its filename
+    '''
+    printStatus("===============================", True)
+    printStatus("Renaming files based on time...", True)
+    printStatus("===============================", True, "\n\n")
+
+    filesSorted = 0
+
+    yearFolders = getYearList(os.listdir(thisScriptPath()))
+    for i in yearFolders:
+        filesSorted = sortTimeRecurse(i)
+    if filesSorted > 0:
+        printStatus("\nRenaming done! " + str(filesSorted) + " files renamed", True, "\n\n")
+    else:
+        printStatus("\nNo files renamed.", True, "\n\n")
+
 def compileTags():
+    '''
+    Ensures that there's an entry in tags.xml for every file in a year folder
+    '''
     printStatus("============================================", True)
     printStatus("Compiling all tag files into one big file...", True)
     printStatus("============================================", True, "\n\n")
@@ -328,6 +334,20 @@ def compileTags():
         printStatus("\nTag compiling done! " + str(tagsCompiled) + " files compiled", True, "\n\n")
     else:
         printStatus("\nNo tag files compiled.", True, "\n\n")
+
+def finalMove():
+    '''
+    Moves all files in /Unsorted into /Raw/[current date] (formatted as
+    DD.MM.YY mm.ss(am/pm))
+    '''
+    scriptPath = thisScriptPath()
+    folderContents = os.listdir(scriptPath + "/Unsorted")
+    rawFolder = scriptPath + "/Raw/" + datetime.datetime.now().strftime("%d.%m.%y %I.%M.%S%p").lower()
+    
+    if not os.path.isdir(rawFolder):
+        os.makedirs(rawFolder)
+    for f in folderContents:
+        move(scriptPath + "/Unsorted/" + f, rawFolder)
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
@@ -352,6 +372,7 @@ if __name__ == "__main__":
     resultsTime = []
     resultsCompile = []
     resultsFinalMove = []
+
     args = get_arguments()
     if args.date or args.all:
         resultsDate = sortDates()
