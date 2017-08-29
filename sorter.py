@@ -128,6 +128,8 @@ def getSortedFilename(count, filename):
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
     filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower() + extension
+    if count < 10:
+        filenameNew = "0" + filenameNew
     return filenameNew
 
 def formatNewFiles(orderedFiles, path):
@@ -140,10 +142,7 @@ def formatNewFiles(orderedFiles, path):
         count += 1
         filenameNew = ""
         match = re.search(r"^([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
-        if match:
-            filenameNew = str(count) + " - " + f    #it will already be in that format
-        else:
-            filenameNew = getSortedFilename(count, f)
+        filenameNew = getSortedFilename(count, f)
         renameFile(path, f, filenameNew)
 
 def sortTimeRecurse(path):
