@@ -9,10 +9,15 @@ from shutil import copytree, copyfile, move
 
 args = None     #command line arguments
 
-def printStatus(text, whenQuiet, textEnd="\n"):
-    if not args.silent:
-        if not args.quiet or whenQuiet:
-            print(text, end=textEnd)
+def printStatus(text, whenQuiet, textEnd="\n", marker=""):
+    toPrint = ""
+    if not args.silent and (not args.quiet or whenQuiet):
+        toPrint = text
+        if marker and not args.nomarker:
+            markerText = "[" + marker + "] "
+            toPrint = markerText + toPrint
+    if toPrint:
+        print(toPrint, end=textEnd)
 
 def thisScriptPath():
     '''
@@ -87,14 +92,14 @@ def relocateFile(oldDir, newDir, filename):
     oldDirFull = thisScriptPath() + "/" + oldDir
     newDirFull = thisScriptPath() + "/" + newDir
     if not os.path.exists(newDirFull):
-        printStatus("Directory /" + newDir + " doesn't exist, creating it... ", False, " ")
+        printStatus("Directory /" + newDir + " doesn't exist, creating it... ", False, " ", "NewDir")
         os.makedirs(newDirFull)
         printStatus("done!", False)
     if args.move:
-        printStatus("Moving file " + filename + "...", False, " ")
+        printStatus("Moving file " + filename + "...", False, " ", " Move ")
         move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     else:
-        printStatus("Copying file " + filename + "...", False, " ")
+        printStatus("Copying file " + filename + "...", False, " ", " Copy ")
         copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     printStatus("done!", False)
 
@@ -104,10 +109,10 @@ def renameFile(dir, filename, filenameNew):
     '''
     dirFull = thisScriptPath() + "/" + dir
     if not os.path.exists(dirFull):
-        printStatus("Directory /" + dir + " doesn't exist, creating it... ", False, " ")
+        printStatus("Directory /" + dir + " doesn't exist, creating it... ", False, " ", "NewDir")
         os.makedirs(dirFull)
         printStatus("done!", False)
-    printStatus("Renaming file " + filename + "...", False, " ")
+    printStatus("Renaming file " + filename + "...", False, " ", "Rename")
     move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
     printStatus("done!", False)
 
@@ -123,7 +128,7 @@ def getOrderedFiles(files):
         if thisDatetime:
             dictFiles[i] = thisDatetime
         else:
-            printStatus(i + " isn't a valid journal file, can't sort by time.", False)
+            printStatus(i + " isn't a valid journal file, can't it sort by time.", False, marker="NoSort")
     sortedList = sorted(dictFiles, key=dictFiles.get)
     return sortedList
 
@@ -180,7 +185,9 @@ def sortDates():
     its filename. Folders are in YYYY/MM/DD format. 
     '''
 
+    printStatus("=================================", True)
     printStatus("Relocating files based on date...", True)
+    printStatus("=================================", True, "\n\n")
 
     unsortedDir = thisScriptPath() + "/Unsorted"
     filesSorted = 0
@@ -195,13 +202,13 @@ def sortDates():
                 relocateFile("/Unsorted", path, f)
                 filesSorted += 1
             else:
-                printStatus(f + " is already in its folder.", False)
+                printStatus(f + " is already in its folder.", False, marker="NoMove")
         else:
             printStatus(f + " is not a journal file, skipping...", False)
     if (filesSorted > 0):
-        printStatus("Relocating done! " + str(filesSorted) + " files sorted.", True)
+        printStatus("\nRelocating done! " + str(filesSorted) + " files sorted.", True, "\n\n")
     else:
-        printStatus("No files moved.", True)
+        printStatus("\nNo files moved.", True, "\n\n")
 
 def finalMove():
     '''
@@ -219,7 +226,9 @@ def finalMove():
 
 
 def sortTimes():
+    printStatus("===============================", True)
     printStatus("Renaming files based on time...", True)
+    printStatus("===============================", True, "\n\n")
 
     filesSorted = 0
 
@@ -227,9 +236,9 @@ def sortTimes():
     for i in yearFolders:
         filesSorted = sortTimeRecurse(i)
     if filesSorted > 0:
-        printStatus("Renaming done! " + str(filesSorted) + " files renamed", True)
+        printStatus("\nRenaming done! " + str(filesSorted) + " files renamed", True, "\n\n")
     else:
-        printStatus("No files renamed.", True)
+        printStatus("\nNo files renamed.", True, "\n\n")
 
 def loadXmlDoc(filename):
     '''
@@ -302,7 +311,9 @@ def prettifyXml(element):
     return reparsed.toprettyxml(indent="\t")
 
 def compileTags():
+    printStatus("============================================", True)
     printStatus("Compiling all tag files into one big file...", True)
+    printStatus("============================================", True, "\n\n")
     tagsCompiled = 0
 
     xmlDoc = loadXmlDoc("tags.xml")
@@ -314,9 +325,9 @@ def compileTags():
         f.write(prettified)
     
     if tagsCompiled > 0:
-        printStatus("Tag compiling done! " + str(tagsCompiled) + " files compiled", True)
+        printStatus("\nTag compiling done! " + str(tagsCompiled) + " files compiled", True, "\n\n")
     else:
-        printStatus("No tag files compiled.", True)
+        printStatus("\nNo tag files compiled.", True, "\n\n")
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
@@ -329,6 +340,7 @@ def get_arguments():
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
     argParser.add_argument("--silent", help='Display no messages', action="store_true")
+    argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
     argParser.add_argument("--verbose", help='''Display each file that was and wasn't acted on''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
