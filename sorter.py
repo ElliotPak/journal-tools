@@ -2,8 +2,10 @@ import argparse
 import os
 import sys
 import re
-from shutil import copytree, copyfile, move
 import datetime
+import xml.etree.ElementTree as ET
+import xml.dom.minidom
+from shutil import copytree, copyfile, move
 
 def thisScriptPath():
     '''
@@ -101,16 +103,6 @@ def renameFile(dir, filename, filenameNew):
     print("Renaming file " + filename + "...", end=" ")
     move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
     print("done!")
-
-def compileTags(args):
-    print("Compiling all tag files into one big file...")
-
-    tagsCompiled = 0
-
-    if tagsCompiled > 0:
-        print("Tag compiling done! " + str(tagsCompiled) + " files compiled")
-    else:
-        print("No tag files compiled.")
 
 def getOrderedFiles(files):
     '''
@@ -233,6 +225,72 @@ def sortTimes(args):
     else:
         print("No files renamed.")
 
+def loadXmlDoc(filename):
+    root = None
+    if os.path.exists(thisScriptPath() + "/" + filename):
+        tree = ET.parse(thisScriptPath() + "/" + filename)
+        root = tree.getroot()
+    else:
+        root = ET.Element("Journals")
+    return root
+
+def getTag(xmlDoc, tag, name):
+    toReturn = None
+    for child in xmlDoc:
+        if child.tag == tag and child.attrib["name"] == name:
+            toReturn = child
+    return toReturn
+
+def getFolderNode(xmlDoc, folder):
+    node = getTag(xmlDoc, "Folder", folder)
+    if not node:
+        node = ET.SubElement(xmlDoc, "Folder", name=folder)
+    return node
+
+def addTagChildren(node, files):
+    tagsCompiled = 0
+    for f in files:
+        if not getTag(node, "File", f):
+            ET.SubElement(node, "File", name=f)
+            tagsCompiled += 1
+    return tagsCompiled
+
+def tagCompileRecurse(xmlDoc, folderPath, folder):
+    fullPath = thisScriptPath() + "/" + folderPath + folder + "/"
+    folderContents = os.listdir(fullPath)
+    files = []
+
+    node = getFolderNode(xmlDoc, folder)
+    for f in folderContents:
+        if os.path.isdir(fullPath + f):
+            tagCompileRecurse(node, folderPath + folder + "/", f)
+        else:
+            files.append(f)
+    tagsCompiled = addTagChildren(node, files)
+    return tagsCompiled
+
+def prettifyXml(element):
+    roughString = ET.tostring(element, 'utf-8')
+    reparsed = xml.dom.minidom.parseString(roughString)
+    return reparsed.toprettyxml(indent="\t")
+
+def compileTags(args):
+    print("Compiling all tag files into one big file...")
+    tagsCompiled = 0
+
+    xmlDoc = loadXmlDoc("tags.xml")
+    yearFolders = getYearList(os.listdir(thisScriptPath()))
+    for i in yearFolders:
+        tagsCompiled = tagCompileRecurse(xmlDoc, "/", i)
+    prettified = prettifyXml(xmlDoc)
+    with open("test.xml", "w") as f:
+        f.write(prettified)
+    
+    if tagsCompiled > 0:
+        print("Tag compiling done! " + str(tagsCompiled) + " files compiled")
+    else:
+        print("No tag files compiled.")
+
 def get_arguments():
     argParser = argparse.ArgumentParser()
     argParser.add_argument("-c", "--compile", help="Combine all already existing tag files into one tag file in this script's directory", action="store_true")
@@ -249,11 +307,11 @@ def get_arguments():
 
 if __name__ == "__main__":
     args = get_arguments()
-    if args.compile or args.all:
-        compileTags(args)
     if args.date or args.all:
         sortDates(args)
         if args.finalcopy:
             finalCopy(args)
     if args.time or args.all:
         sortTimes(args)
+    if args.compile or args.all:
+        compileTags(args)
