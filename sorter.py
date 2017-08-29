@@ -226,6 +226,10 @@ def sortTimes(args):
         print("No files renamed.")
 
 def loadXmlDoc(filename):
+    '''
+    Attempts to load filename as an xml document and returns the root of the
+    document. If it doesn't exist, it creates a new root node and returns that.
+    '''
     root = None
     if os.path.exists(thisScriptPath() + "/" + filename):
         tree = ET.parse(thisScriptPath() + "/" + filename)
@@ -235,6 +239,10 @@ def loadXmlDoc(filename):
     return root
 
 def getTag(xmlDoc, tag, name):
+    '''
+    Searches xmlDoc for a child tag of type tag with a specified name
+    attribute. Returns the result, if it can be found. Otherwise returns None.
+    '''
     toReturn = None
     for child in xmlDoc:
         if child.tag == tag and child.attrib["name"] == name:
@@ -248,6 +256,10 @@ def getFolderNode(xmlDoc, folder):
     return node
 
 def addTagChildren(node, files):
+    '''
+    for every entry in files, adds a child to node. The child is a "File" tag
+    with a name attribute equal to the entry in "files".
+    '''
     tagsCompiled = 0
     for f in files:
         if not getTag(node, "File", f):
@@ -256,6 +268,12 @@ def addTagChildren(node, files):
     return tagsCompiled
 
 def tagCompileRecurse(xmlDoc, folderPath, folder):
+    '''
+    Runs through all files in folderPath/folder adds them to a list, to be
+    added to xmlDoc as children [see addTagChildren()]. Calls itself on all
+    folders it finds in the path. Returns the amount of files added to the
+    tag file.
+    '''
     fullPath = thisScriptPath() + "/" + folderPath + folder + "/"
     folderContents = os.listdir(fullPath)
     files = []
@@ -270,6 +288,9 @@ def tagCompileRecurse(xmlDoc, folderPath, folder):
     return tagsCompiled
 
 def prettifyXml(element):
+    '''
+    Converts XML to a beautified format.
+    '''
     roughString = ET.tostring(element, 'utf-8')
     reparsed = xml.dom.minidom.parseString(roughString)
     return reparsed.toprettyxml(indent="\t")
