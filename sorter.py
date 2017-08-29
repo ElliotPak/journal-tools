@@ -9,7 +9,7 @@ from shutil import copytree, copyfile, move
 
 args = None     #command line arguments
 
-def printStatus(text, whenQuiet, textEnd="\n", marker=""):
+def printStatus(text, whenQuiet=False, textEnd="\n", marker=""):
     '''
     prints text. if the --quiet flag is used and whenQuiet is false, text won't
     be printed. If marker isn't an empty string, it's inserted between square
@@ -40,24 +40,25 @@ def getYearList(yearStrList):
             newYearList.append(i)
     return newYearList
 
-def isFileAlreadyHere(filename, path):
+def isFileAlreadyHere(filename, filePath, pathToCheck):
     '''
-    Returns true if any file in "path" has the same file size as "filename"
-    and the same datetime in its filename as "filename"'s filename
+    Returns true if any file in "pathtoCheck" has the same file size as
+    "filename" and the same datetime in its filename as
+    "filename"'s filename
     '''
     alreadyHere = False
 
     scriptPath = thisScriptPath()
-    fullPath = scriptPath + "/" + path + "/"
-    fileSize = os.path.getsize(scriptPath + filename)
+    fullPath = scriptPath + "/" + pathToCheck + "/"
+    fileSize = os.path.getsize(scriptPath + filePath + filename)
 
     if os.path.isdir(fullPath):
         folderContents = os.listdir(fullPath)
         for f in folderContents:
             if not alreadyHere and os.path.isfile(fullPath + f):
                 thisFileSize = os.path.getsize(fullPath + f)
-                fileDatetime = datetimeFromFilename(scriptPath + filename)
-                thisFileDatetime = datetimeFromFilename(fullPath + f)
+                fileDatetime = datetimeFromFilename(filename)
+                thisFileDatetime = datetimeFromFilename(f)
                 if fileSize == thisFileSize and fileDatetime == thisFileDatetime:
                     alreadyHere = True
     return alreadyHere
@@ -90,6 +91,7 @@ def datetimeFromFilename(filenameFull):
                 found = True
             except ValueError:
                 pass
+    thisDatetime = thisDatetime.replace(second=0)
     return thisDatetime
 
 def relocateFile(oldDir, newDir, filename):
@@ -158,6 +160,7 @@ def formatNewFiles(orderedFiles, path):
     Renames all files in orderedFiles to their sorted filename. 
     Sorted filename comes from getSortedFilename()
     '''
+    filesSorted = {}
     count = 0
     for f in orderedFiles:
         count += 1
@@ -165,6 +168,8 @@ def formatNewFiles(orderedFiles, path):
         match = re.search(r"^([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
         filenameNew = getSortedFilename(count, f)
         renameFile(path, f, filenameNew)
+        filesSorted[f] = filenameNew
+    return filesSorted
 
 def sortTimeRecurse(path):
     '''
@@ -173,20 +178,20 @@ def sortTimeRecurse(path):
     Also calls itself on all folders in path. 
     Returns the amount of files sorted.  
     '''
-    count = 0
+    filesSorted = [{}, [], []]
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
     fileList = []
     for f in folderContents:
         if os.path.isdir(fullPath + f):
-            count += sortTimeRecurse(path + "/" + f)
+            filesSortedNew = sortTimeRecurse(path + "/" + f)
+            addToFilesSorted(filesSorted, filesSortedNew)
         else:
             fileList.append(f)
-            count += 1
     if fileList:
         orderedFiles = getOrderedFiles(fileList)
-        formatNewFiles(orderedFiles, path + "/")
-    return count
+        filesSorted[0] = formatNewFiles(orderedFiles, path + "/")
+    return filesSorted
 
 def loadXmlDoc(filename):
     '''
@@ -208,7 +213,7 @@ def getTag(xmlDoc, tag, name):
     '''
     toReturn = None
     for child in xmlDoc:
-        if child.tag == tag and child.attrib["name"] == name:
+        if child.tag == tag and child.attrib["name"] == name and not toReturn:
             toReturn = child
     return toReturn
 
@@ -227,11 +232,13 @@ def addTagChildren(node, files):
     for every entry in files, adds a child to node. The child is a "File" tag
     with a name attribute equal to the entry in "files".
     '''
-    tagsCompiled = 0
+    tagsCompiled = [[], []]
     for f in files:
-        if not getTag(node, "File", f):
+        if getTag(node, "File", f) == None:
             ET.SubElement(node, "File", name=f)
-            tagsCompiled += 1
+            tagsCompiled[0].append(f)
+        else:
+            tagsCompiled[1].append(f)
     return tagsCompiled
 
 def tagCompileRecurse(xmlDoc, folderPath, folder):
@@ -244,24 +251,50 @@ def tagCompileRecurse(xmlDoc, folderPath, folder):
     fullPath = thisScriptPath() + "/" + folderPath + folder + "/"
     folderContents = os.listdir(fullPath)
     files = []
+    tagsCompiled = [[], []]
 
     node = getFolderNode(xmlDoc, folder)
     for f in folderContents:
         if os.path.isdir(fullPath + f):
-            tagCompileRecurse(node, folderPath + folder + "/", f)
+            tagsCompiledNew = tagCompileRecurse(node, folderPath + folder + "/", f)
+            addToTagsCompiled(tagsCompiled, tagsCompiledNew)
         else:
             files.append(f)
-    tagsCompiled = addTagChildren(node, files)
+    tagsCompiledNew = addTagChildren(node, files)
+    addToTagsCompiled(tagsCompiled, tagsCompiledNew)
     return tagsCompiled
+
+def removeAnnoyingLines(elem):
+    hasWords = re.compile("\\w")
+    for element in elem.iter():
+        if not re.search(hasWords,str(element.tail)):
+            element.tail=""
+        if not re.search(hasWords,str(element.text)):
+            element.text = ""
 
 def prettifyXml(element):
     '''
     Converts XML to a beautified format. Might take time (requires re-parsing,
     sadly ;_;)
     '''
+    removeAnnoyingLines(element)
     roughString = ET.tostring(element, 'utf-8')
     reparsed = xml.dom.minidom.parseString(roughString)
-    return reparsed.toprettyxml(indent="\t")
+    toReturn = reparsed.toprettyxml(indent="\t")
+    return toReturn
+
+def addToFilesSorted(filesSorted, filesSortedNew):
+    for ii, jj in filesSortedNew[0].items():
+        if ii != jj:
+            filesSorted[0][ii] = jj
+    for kk in [1, 2]:
+        for ii in filesSortedNew[kk]:
+            filesSorted.append[ii]
+
+def addToTagsCompiled(tagsCompiled, tagsCompiledNew):
+    for ii in [0, 1]:
+        for jj in tagsCompiledNew[ii]:
+            tagsCompiled[ii].append(jj)
 
 def sortDates():
     '''
@@ -274,7 +307,7 @@ def sortDates():
     printStatus("=================================", True, "\n\n")
 
     unsortedDir = thisScriptPath() + "/Unsorted"
-    filesSorted = 0
+    filesSorted = [{}, [], []]      #[successfully sorted, already sorted, not a journal file]
 
     if not os.path.exists(unsortedDir):
         os.makedirs(unsortedDir)
@@ -282,18 +315,22 @@ def sortDates():
         date = datetimeFromFilename(f)
         if date:
             path = date.strftime("%Y/%m/%d")
-            if not isFileAlreadyHere("/Unsorted/" + f, path):
+            if not isFileAlreadyHere(f, "/Unsorted/", path):
                 relocateFile("/Unsorted", path, f)
-                filesSorted += 1
+                filesSorted[0][f] = path
             else:
                 printStatus(f + " is already in its folder.", False, marker="NoMove")
+                filesSorted[1].append(f)
         else:
             printStatus(f + " is not a journal file, skipping...", False)
-    if (filesSorted > 0):
-        printStatus("\nRelocating done! " + str(filesSorted) + " files sorted.", True, "\n\n")
+            filesSorted[2].append(f)
+
+    filesSortedAmount = len(filesSorted[0])
+    if (filesSortedAmount > 0):
+        printStatus("\nRelocating done! " + str(filesSortedAmount) + " files sorted.", True, "\n\n")
     else:
         printStatus("\nNo files moved.", True, "\n\n")
-
+    return filesSorted
 
 def sortTimes():
     '''
@@ -304,15 +341,18 @@ def sortTimes():
     printStatus("Renaming files based on time...", True)
     printStatus("===============================", True, "\n\n")
 
-    filesSorted = 0
-
+    filesSorted = [{}, [], []]      #[successfully sorted, already sorted, not a journal file]
     yearFolders = getYearList(os.listdir(thisScriptPath()))
     for i in yearFolders:
-        filesSorted = sortTimeRecurse(i)
-    if filesSorted > 0:
-        printStatus("\nRenaming done! " + str(filesSorted) + " files renamed", True, "\n\n")
+        filesSortedNew = sortTimeRecurse(i)
+        addToFilesSorted(filesSorted, filesSortedNew)
+
+    filesSortedAmount = len(filesSorted[0])
+    if filesSortedAmount > 0:
+        printStatus("\nRenaming done! " + str(filesSortedAmount) + " files renamed", True, "\n\n")
     else:
         printStatus("\nNo files renamed.", True, "\n\n")
+    return filesSorted
 
 def compileTags():
     '''
@@ -321,20 +361,23 @@ def compileTags():
     printStatus("============================================", True)
     printStatus("Compiling all tag files into one big file...", True)
     printStatus("============================================", True, "\n\n")
-    tagsCompiled = 0
+    tagsCompiled = [[], []]
 
     xmlDoc = loadXmlDoc("tags.xml")
     yearFolders = getYearList(os.listdir(thisScriptPath()))
     for i in yearFolders:
-        tagsCompiled = tagCompileRecurse(xmlDoc, "/", i)
+        tagsCompiledNew = tagCompileRecurse(xmlDoc, "/", i)
+        addToTagsCompiled(tagsCompiled, tagsCompiledNew)
     prettified = prettifyXml(xmlDoc)
-    with open("test.xml", "w") as f:
+    with open("tags.xml", "w") as f:
         f.write(prettified)
-    
-    if tagsCompiled > 0:
-        printStatus("\nTag compiling done! " + str(tagsCompiled) + " files compiled", True, "\n\n")
+            
+    tagsCompiledAmount = len(tagsCompiled[0])
+    if tagsCompiledAmount > 0:
+        printStatus("\nTag compiling done! " + str(tagsCompiledAmount) + " files compiled", True, "\n\n")
     else:
         printStatus("\nNo tag files compiled.", True, "\n\n")
+    return tagsCompiled
 
 def finalMove():
     '''
@@ -349,6 +392,41 @@ def finalMove():
         os.makedirs(rawFolder)
     for f in folderContents:
         move(scriptPath + "/Unsorted/" + f, rawFolder)
+    
+def printResults(date, time, compile, finalCopy):
+    print("===============")
+    print("Verbose output:")
+    print("===============")
+
+    if date:
+        if date[0]:
+            print("\nThe following files were successfully moved:")
+            for ii, jj in date[0].items():
+                text = "    " + ii + " (moved to " + jj + ")"
+                print(text)
+        if date[1]:
+            print("\nThe following files were already in their folders:")
+            for ii in date[1]:
+                print("    " + ii)
+        if date[2]:
+            print("\nThe following files weren't moved since they weren't journal files: ")
+            for ii in date[2]:
+                print("    " + ii)
+    if time:
+        if time[0]:
+            print("\nThe following files were successfully renamed:")
+            for ii, jj in time[0].items():
+                text = "    " + ii + " (renamed to " + jj + ")"
+                print(text)
+    if compile:
+        if compile[0]:
+            print("\nThe following tags were compiled:")
+            for ii in compile[0]:
+                print("    " + ii)
+        if compile[1]:
+            print("\nThe following tags were not compiled:")
+            for ii in compile[0]:
+                print("    " + ii)
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
@@ -360,7 +438,7 @@ def get_arguments():
     argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
-    argParser.add_argument("--silent", help='Display no messages', action="store_true")
+    argParser.add_argument("--silent", help='Display no messages while anything occurs', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
     argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")
     args = argParser.parse_args()
@@ -380,6 +458,12 @@ if __name__ == "__main__":
         if args.finalmove:
             resultsFinalMove = finalMove()
     if args.time or args.all:
-        resultsCompile = sortTimes()
+        resultsTime = sortTimes()
     if args.compile or args.all:
         resultsCompile = compileTags()
+        
+    print("\nAll operations completed!\n")
+
+    if args.verbose:
+        printResults(resultsDate, resultsTime, resultsCompile, [])
+        #printResults(resultsDate, resultsTime, resultsCompile, resultsFinalMove)
