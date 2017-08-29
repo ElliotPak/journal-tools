@@ -42,7 +42,8 @@ def getYearList(yearStrList):
 
 def isFileAlreadyHere(filename, path):
     '''
-    Returns true if any file in "path" has the same file size as "filename".
+    Returns true if any file in "path" has the same file size as "filename"
+    and the same datetime in its filename as "filename"'s filename
     '''
     alreadyHere = False
 
