@@ -77,9 +77,9 @@ def datetimeFromFilename(filenameFull):
     formats = [
         "VID%Y%m%d%H%M%S",
         "%Y_%m_%d_%H_%M_%S",
-        "%j Y-%m-%d %H-%M-%S",
-        "%J Y_%m_%d_%H_%M_%S",
-        "%j Y_%m_%d_%H_%M_%S",
+        "j %Y-%m-%d %H-%M-%S",
+        "J %Y_%m_%d_%H_%M_%S",
+        "j %Y_%m_%d_%H_%M_%S",
         "%d.%m.%y %I.%M%p",
         "%Y%m%d%H%M%S",
         "%Y-%m-%d %H-%M-%S"
@@ -91,7 +91,8 @@ def datetimeFromFilename(filenameFull):
                 found = True
             except ValueError:
                 pass
-    thisDatetime = thisDatetime.replace(second=0)
+    if thisDatetime != None:
+        thisDatetime = thisDatetime.replace(second=0)
     return thisDatetime
 
 def relocateFile(oldDir, newDir, filename):
@@ -313,7 +314,7 @@ def sortDates():
         os.makedirs(unsortedDir)
     for f in os.listdir(unsortedDir):
         date = datetimeFromFilename(f)
-        if date:
+        if date != None:
             path = date.strftime("%Y/%m/%d")
             if not isFileAlreadyHere(f, "/Unsorted/", path):
                 relocateFile("/Unsorted", path, f)
@@ -322,7 +323,7 @@ def sortDates():
                 printStatus(f + " is already in its folder.", False, marker="NoMove")
                 filesSorted[1].append(f)
         else:
-            printStatus(f + " is not a journal file, skipping...", False)
+            printStatus(f + " is not a journal file, skipping...", False, marker="!!NotJ")
             filesSorted[2].append(f)
 
     filesSortedAmount = len(filesSorted[0])
@@ -425,7 +426,7 @@ def printResults(date, time, compile, finalCopy):
                 print("    " + ii)
         if compile[1]:
             print("\nThe following tags were not compiled:")
-            for ii in compile[0]:
+            for ii in compile[1]:
                 print("    " + ii)
 
 def get_arguments():
