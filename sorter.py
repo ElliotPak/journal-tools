@@ -411,7 +411,7 @@ def printResults(date, time, compile, finalCopy):
         if date[0]:
             print("\nThe following files were successfully moved:")
             for ii, jj in date[0].items():
-                text = "    " + ii + " (moved to " + jj + ")"
+                text = "    " + ii + "      moved to " + jj
                 print(text)
         if date[1]:
             print("\nThe following files were already in their folders:")
@@ -425,7 +425,7 @@ def printResults(date, time, compile, finalCopy):
         if time[0]:
             print("\nThe following files were successfully renamed:")
             for ii, jj in time[0].items():
-                text = "    " + ii + " (renamed to " + jj + ")"
+                text = "    From: " + ii + "      To: " + jj
                 print(text)
     if compile:
         if compile[0]:
