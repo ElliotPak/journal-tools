@@ -172,11 +172,12 @@ def formatNewFiles(orderedFiles, path):
     count = 0
     for f in orderedFiles:
         count += 1
-        filenameNew = ""
-        match = re.search(r"^([0-3]?\d).([0-1]?\d).(\d\d) ([0-1]?\d).([0-5]\d)(am|pm)", f)
         filenameNew = getSortedFilename(count, f)
-        renameFile(path, f, filenameNew)
-        filesSorted[f] = filenameNew
+        if (f != filenameNew):
+            renameFile(path, f, filenameNew)
+            filesSorted[f] = filenameNew
+        else:
+            printStatus(f + " already has a valid name, skipping...", False, marker="NoRenm")
     return filesSorted
 
 def sortTimeRecurse(path):
@@ -448,7 +449,7 @@ def get_arguments():
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
     argParser.add_argument("--silent", help='Display no messages while anything occurs', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
-    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")\
+    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
