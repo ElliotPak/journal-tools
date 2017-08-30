@@ -89,12 +89,12 @@ def datetimeFromFilename(filenameFull):
             except ValueError:
                 pass
     
-    toRegexSearch = {
-        "%d.%m.%y %I.%M%p": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)",
-        "%d.%m.%y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d)",
-        "%d %m %Y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"
-    }
-    for ii, jj in toRegexSearch.items():
+    toRegexSearch = [
+        ["%d.%m.%y %I.%M%p", r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)"],
+        ["%d %m %Y", r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"],
+        ["%d.%m.%y", r"([0-3]?\d)\.([0-1]?\d)\.(\d\d)"]
+    ]
+    for ii, jj in toRegexSearch:
         match = re.search(jj, filename)
         if match and not found:
             found = True
