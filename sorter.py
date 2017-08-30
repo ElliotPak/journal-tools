@@ -70,16 +70,6 @@ def datetimeFromFilename(filenameFull):
     found = False
     thisDatetime = None
     filename = os.path.splitext(filenameFull)[0]
-    toRegexSearch = {
-        "%d.%m.%y %I.%M%p": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)",
-        "%d.%m.%y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d)",
-        "%d %m %Y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"
-    }
-    for ii, jj in toRegexSearch.items():
-        match = re.search(jj, filename)
-        if match:
-            found = True
-            thisDatetime = datetime.datetime.strptime(match.group(0), ii)
     formats = [
         "VID%Y%m%d%H%M%S",
         "IMG%Y%m%d%H%M%S",
@@ -98,6 +88,17 @@ def datetimeFromFilename(filenameFull):
                 found = True
             except ValueError:
                 pass
+    
+    toRegexSearch = {
+        "%d.%m.%y %I.%M%p": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)",
+        "%d.%m.%y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d)",
+        "%d %m %Y": r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"
+    }
+    for ii, jj in toRegexSearch.items():
+        match = re.search(jj, filename)
+        if match and not found:
+            found = True
+            thisDatetime = datetime.datetime.strptime(match.group(0), ii)
     if thisDatetime != None:
         thisDatetime = thisDatetime.replace(second=0)
     return thisDatetime
@@ -115,10 +116,12 @@ def relocateFile(oldDir, newDir, filename):
         printStatus("done!", False)
     if args.move:
         printStatus("Moving file " + filename + "...", False, " ", " Move ")
-        move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
+        if not args.nofiles:
+            move(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     else:
         printStatus("Copying file " + filename + "...", False, " ", " Copy ")
-        copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
+        if not args.nofiles:
+            copyfile(oldDirFull + "/" + filename, newDirFull + "/" + filename)
     printStatus("done!", False)
 
 def renameFile(dir, filename, filenameNew):
@@ -131,7 +134,8 @@ def renameFile(dir, filename, filenameNew):
         os.makedirs(dirFull)
         printStatus("done!", False)
     printStatus("Renaming file " + filename + "...", False, " ", "Rename")
-    move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
+    if not args.nofiles:
+        move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
     printStatus("done!", False)
 
 def getOrderedFiles(files):
@@ -400,7 +404,8 @@ def finalMove():
     if not os.path.isdir(rawFolder):
         os.makedirs(rawFolder)
     for f in folderContents:
-        move(scriptPath + "/Unsorted/" + f, rawFolder)
+        if not args.nofiles:
+            move(scriptPath + "/Unsorted/" + f, rawFolder)
     
 def printResults(date, time, compile, finalCopy):
     print("===============")
@@ -411,7 +416,7 @@ def printResults(date, time, compile, finalCopy):
         if date[0]:
             print("\nThe following files were successfully moved:")
             for ii, jj in date[0].items():
-                text = "    " + ii + "      moved to " + jj
+                text = "    " + ii + "\n      moved to " + jj
                 print(text)
         if date[1]:
             print("\nThe following files were already in their folders:")
@@ -425,7 +430,7 @@ def printResults(date, time, compile, finalCopy):
         if time[0]:
             print("\nThe following files were successfully renamed:")
             for ii, jj in time[0].items():
-                text = "    From: " + ii + "      To: " + jj
+                text = "    From: " + ii + "\n      To: " + jj
                 print(text)
     if compile:
         if compile[0]:
@@ -444,6 +449,7 @@ def get_arguments():
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
+    argParser.add_argument("--nofiles", help='''Doesn't actually move anything.''', action="store_true")
     argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
