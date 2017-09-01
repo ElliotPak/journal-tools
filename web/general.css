@@ -1,0 +1,59 @@
+/*  Copyright 2014 gokoururi
+    This work is free. You can redistribute it and/or modify it under the
+    terms of the Do What The Fuck You Want To Public License, Version 2,
+    as published by Sam Hocevar. See the COPYING file for more details. */
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+}
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+    font-family: Tahoma;
+    text-align: center;
+    border: 0;
+}
+
+#everything {
+    min-width: 1280px;
+    min-height: 500px;
+    width: 100%;
+    height: 100%;
+    background: #DDD;
+}
+
+#sidebar {
+    padding-top: 25px;
+    height:calc(100% - 25px);
+    width:20%;
+    float: left;
+    background: #333;
+}
+
+#notSidebar {
+    padding-top: 10px;
+    height:calc(100% - 10px);
+    width:80%;
+    float: left;
+}
+
+#loadBar {
+    height:40px;
+    width:100%;
+    margin:auto;
+}
+
+#sidebarFolder{
+    font-size: 18px;
+    color: #8FF;
+}
+
+#sidebarFile{
+    font-size: 18px;
+    color: #CFF;
+}
+
