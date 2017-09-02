@@ -47,12 +47,12 @@ body {
     margin:auto;
 }
 
-#sidebarFolder{
+.sidebarFolder{
     font-size: 18px;
     color: #8FF;
 }
 
-#sidebarFile{
+.sidebarFile{
     font-size: 18px;
     color: #CFF;
 }

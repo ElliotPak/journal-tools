@@ -21,7 +21,15 @@ function loadFile()
         fr = new FileReader();
         fr.onload = function () {
             xmlText = fr.result;
-            xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml")
+            xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+            if (typeof window.taggerLoaded != 'undefined')
+            {
+                startEditing(xmlDoc.documentElement);
+            }
+            if (typeof window.viewerLoaded != 'undefined')
+            {
+                startViewing(xmlDoc.documentElement);
+            }
         };
         fr.readAsText(file);
     }
