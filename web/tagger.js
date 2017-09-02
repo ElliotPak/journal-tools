@@ -7,6 +7,7 @@ function startEditing(xmlNode)
 {
     clearChildrenList();
     taggerCurrentDir = xmlNode;
+    displayPath();
     makeChildrenList(xmlNode.children);
 }
 
@@ -24,6 +25,7 @@ function browseFolder(name)
                 clearChildrenList();
                 addParent();
                 makeChildrenList(taggerCurrentDir.children);
+                displayPath();
             })();
         }
     }
@@ -40,21 +42,23 @@ function backFolder()
         addParent();
     }
     makeChildrenList(taggerCurrentDir.children);
+    displayPath();
 }
 
 function addParent()
 {
     link = document.createElement("a");
+    link.href = "#";
     link.innerText = "<== back";
     link.classList.add("sidebarFolder");
     link.onclick = function() {backFolder();};
-    $("#sidebar").append(link);
-    $("#sidebar").append(document.createElement("br"));
+    $("#container").append(link);
+    $("#container").append(document.createElement("br"));
 }
 
 function clearChildrenList()
 {
-    $("#sidebar").empty();
+    $("#container").empty();
 }
 
 function makeChildrenList(children)
@@ -84,9 +88,46 @@ function makeChildrenList(children)
                 };
             })(ii);
         }
-        $("#sidebar").append(link);
-        $("#sidebar").append(document.createElement("br"));
+        $("#container").append(link);
+        $("#container").append(document.createElement("br"));
     }
+}
+
+function displayPath()
+{
+    if ($(".pathActual").length == 0)
+    {
+        $("#sidebar").prepend(document.createElement("br"));
+        span = document.createElement("span");
+        span.innerText = getPathName();
+        span.classList.add("pathActual")
+        $("#sidebar").prepend(span)
+        $("#sidebar").prepend(document.createElement("br"));
+    }
+    else{
+        $(".pathActual")[0].innerText = getPathName();
+    }
+    if ($(".pathHeader").length == 0)
+    {
+        $("#sidebar").prepend(document.createElement("br"));
+        span = document.createElement("span");
+        span.innerText = "Current path:";
+        span.classList.add("pathHeader");
+        $("#sidebar").prepend(span);
+    }
+}
+
+function getPathName()
+{
+    node = taggerCurrentDir;
+    path = "/"
+    while(node.parentNode.nodeName != "#document")
+    {
+        path = "/" + node.getAttribute("name") + path;
+        node = node.parentNode;
+    }
+    console.log(path)
+    return path;
 }
 
 //function 
