@@ -13,7 +13,7 @@ body {
     margin: 0;
     padding: 0;
     font-size: 0;
-    font-family: Tahoma;
+    font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     border: 0;
 }
@@ -38,6 +38,7 @@ body {
     width:20%;
     float: left;
     background: #333;
+    overflow: hidden;
 }
 
 #notSidebar {
@@ -56,6 +57,7 @@ body {
 #editor {
     height:calc(100% - 40px);
     width:100%;
+    text-align: cente;
 }
 
 #container {
@@ -85,3 +87,30 @@ body {
     font-weight: bold;
 }
 
+.loadNotice{
+    font-size: 24px;
+    color: #333;
+    font-weight: bold;
+}
+
+.segmentHeader{
+    font-size: 22px;
+    color: #333;
+    font-weight: bold;
+}
+
+.thirdHSegment {
+    width: 33.3%;
+    height:100%;
+    float: left;
+    display: inline-block;
+}
+
+.halfVSegment {
+    width: 100%;
+    height:50%;
+}
+
+.previewAudio {
+    width: 95%;
+}
