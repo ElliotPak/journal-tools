@@ -138,9 +138,19 @@ function getPathName()
 
 function editFile(name)
 {
+    removeOldFileStuff();
     setUpEditor();
     taggerCurrentFile = getFileNode(name);
     loadPreview();
+}
+
+function removeOldFileStuff()
+{
+    thingsToRemove = ["#preview", "#notes", "#tagList", "#quoteList"];
+    for (ii = 0; ii < thingsToRemove.length; ii++)
+    {
+        $(thingsToRemove[ii]).remove();
+    }
 }
 
 function setUpEditor()
@@ -185,13 +195,13 @@ function loadPreview()
     switch(extension)
     {
         case "mp3":
-            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp3" /></audio>';
+            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp3" /></audio>';
             break;
         case "m4a":
-            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
             break;
         case "aac":
-            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
             break;
         
     }
