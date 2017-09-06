@@ -181,12 +181,20 @@ function loadPreview()
 {
     filename = taggerCurrentFile.getAttribute("name");
     extension = filename.split('.').pop();
+    previewText = "";
     switch(extension)
     {
         case "mp3":
-            audioText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp3" /></audio>';
-            $("#segmentPreview").append("<br />");
-            $("#segmentPreview").append(audioText);
+            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp3" /></audio>';
             break;
+        case "m4a":
+            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            break;
+        case "aac":
+            previewText = '<audio controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            break;
+        
     }
+    $("#segmentPreview").append("<br />");
+    $("#segmentPreview").append(previewText);
 }
