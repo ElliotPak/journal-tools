@@ -17,5 +17,7 @@ function loadFile()
 
 function saveFile()
 {
-    
+    xmlString = new XMLSerializer().serializeToString(xmlDoc);
+    var blob=new Blob([xmlString],{type:'text/xml;charset=utf-8'});
+    saveAs(blob,'tags.xml');
 }
