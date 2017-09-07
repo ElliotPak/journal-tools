@@ -5,14 +5,11 @@ taggerCurrentFile = null;
 
 function startEditing(xmlNode)
 {
-    clearChildrenList();
     taggerCurrentDir = xmlNode;
+    clearChildrenList();
     displayPath();
     makeChildrenList(xmlNode.children);
-    span = document.createElement("span");
-    span.innerText = "Load a file!";
-    span.classList.add("loadNotice");
-    $("#editor").append(span)
+    $('#notSidebar').append('<button onclick="saveFile();">Save file</button>');
 }
 
 function browseFolder(name)
@@ -38,9 +35,7 @@ function browseFolder(name)
 function backFolder()
 {
     clearChildrenList();
-    console.log(taggerCurrentDir);
     taggerCurrentDir = taggerCurrentDir.parentNode;
-    console.log(taggerCurrentDir.parentNode.nodeName)
     if (taggerCurrentDir.parentNode.nodeName != "#document")
     {
         addParent();
@@ -130,27 +125,31 @@ function getPathName()
         path = "/" + node.getAttribute("name") + path;
         node = node.parentNode;
     }
-    console.log(path)
     return path;
 }
 
-//function 
-
 function editFile(name)
 {
+    saveOldFile()
     removeOldFileStuff();
     setUpEditor();
     taggerCurrentFile = getFileNode(name);
     loadPreview();
+    loadFileMetadata();
 }
 
 function removeOldFileStuff()
 {
     thingsToRemove = ["#preview", "#notes", "#tagList", "#quoteList"];
-    for (ii = 0; ii < thingsToRemove.length; ii++)
-    {
-        $(thingsToRemove[ii]).remove();
-    }
+    $("#preview").remove();
+    $("#notesBox").val('');
+    $('.timeElementTag').remove();
+    $('.timeElementQuote').remove();
+}
+
+function saveOldFile()
+{
+    
 }
 
 function setUpEditor()
@@ -160,13 +159,18 @@ function setUpEditor()
         $(".loadNotice").remove();
         $("#editor").append('<div class="thirdHSegment" id="segmentMisc"></div>');
         $("#editor").append('<div class="thirdHSegment" id="segmentTag"></div>');
-        $("#segmentTag").append('<span class="segmentHeader">Tags:</span>');
+        $("#segmentTag").append('<span class="segmentHeader">Tags:</span><br />>');
+        $("#segmentTag").append('<button onclick="addTag(false);">Add tag</button>');
+        $("#segmentTag").append('<button onclick="addTag(true);">Add tag at current time</button>');
         $("#editor").append('<div class="thirdHSegment" id="segmentQuote"></div>');
-        $("#segmentQuote").append('<span class="segmentHeader">Quotes:</span>');
+        $("#segmentQuote").append('<span class="segmentHeader">Quotes:</span><br />');
+        $("#segmentQuote").append('<button onclick="addQuote(false);">Add quote</button>');
+        $("#segmentQuote").append('<button onclick="addQuote(true);">Add quote at current time</button>');
         $("#segmentMisc").append('<div class="halfVSegment" id="segmentPreview"></div>');
         $("#segmentPreview").append('<span class="segmentHeader">Preview:</span>');
         $("#segmentMisc").append('<div class="halfVSegment" id="segmentNotes"></div>');
-        $("#segmentNotes").append('<span class="segmentHeader">Notes:</span>');
+        $("#segmentNotes").append('<span class="segmentHeader">Notes:</span><br />>');
+        $("#segmentNotes").append('<textarea id="notesBox"></textarea>');
     }
 }
 
@@ -177,7 +181,6 @@ function getFileNode(name)
     for (var ii = 0; ii < children.length; ii++)
     {
         thisChild = children[ii];
-        console.log(thisChild);
         thisName = thisChild.getAttribute("name");
         if (thisChild.nodeName == "File" && thisName == name)
         {
@@ -207,4 +210,61 @@ function loadPreview()
     }
     $("#segmentPreview").append("<br />");
     $("#segmentPreview").append(previewText);
+}
+
+function loadFileMetadata()
+{
+    children = taggerCurrentFile.children;
+        console.log(taggerCurrentFile);
+    for (var ii = 0; ii < children.length; ii++)
+    {
+        thisChild = children[ii];
+        console.log(thisChild);
+        if (thisChild.nodeName == "Notes")
+        {
+            $("#notesBox").val(thisChild.innerHTML);
+        }
+        else if (thisChild.nodeName == "Tag" || thisChild.nodeName == "Quote")
+        {
+            time = thisChild.getAttribute("time");
+            isTimed = thisChild.getAttribute("isTimed");
+            addTimeElement(thisChild.nodeName, isTimed, time, thisChild.innerHTML)
+        }
+    }
+}
+
+function addTag(isNow)
+{
+    time = 0;
+    if (isNow)
+    {
+        time = $("#preview").currentTime;
+    }
+    addTimeElement("Tag", isNow, time, "");
+}
+
+function addQuote(isNow)
+{
+    time = 0;
+    if (isNow)
+    {
+        time = $("#preview").currentTime;
+    }
+    addTimeElement("Quote", isNow, time, "");
+}
+
+function addTimeElement(segment, isTimed, time, text)
+{
+    element = $('<div class="timeElement"></div>');
+    elementText = $('<input class="inputText" type="text" value="' + text + '"></input><br />');  //adding tag text box
+    element.append(elementText);
+    elementCheck = '<span class="inputDesc">Is this timed?</span><input  type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
+    element.append(elementCheck);
+    elementTime = '<span class="inputDesc">Time: </span><input class="inputTime" type="text" value="' + time + '"></input><br />';    //adding time text
+    element.append(elementTime);
+    elementJump = '<button onclick="jumpToTime(this)">Jump to this time</button>';    //adding time jump button
+    element.append(elementJump);
+    elementSet = '<button onclick="setToCurrentTime(this)">Set to current time</button>';    //adding time jump button
+    element.append(elementSet);
+    $("#segment" + segment).append(element);
 }
