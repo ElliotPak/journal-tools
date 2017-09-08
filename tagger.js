@@ -276,6 +276,18 @@ function addQuote(isNow)
     addTimeElement("Quote", isNow, time, "");
 }
 
+function jumpToTime(node)
+{
+    thisTime = $(node).parent().children('.inputTime')[0].value
+    $("#preview")[0].currentTime = thisTime;
+}
+
+function setToCurrentTime(node)
+{
+    currentTime = $("#preview")[0].currentTime;
+    $(node).parent().children('.inputTime')[0].value = currentTime;
+}
+
 function addTimeElement(segment, isTimed, time, text)
 {
     element = $('<div class="timeElement"></div>');
