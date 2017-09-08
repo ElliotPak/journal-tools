@@ -145,11 +145,36 @@ function removeOldFileStuff()
     $("#notesBox").val('');
     $('.timeElementTag').remove();
     $('.timeElementQuote').remove();
+    $("#segmentTag").children(".timeElement").each(function() { $(this).remove(); });
+    $("#segmentQuote").children(".timeElement").each(function() { $(this).remove(); });
 }
 
 function saveOldFile()
 {
-    
+    if (taggerCurrentFile != null)
+    {
+        while (taggerCurrentFile.firstChild) {
+            taggerCurrentFile.removeChild(taggerCurrentFile.firstChild);
+        }
+
+        notes = xmlDoc.createElement("Notes");
+        notes.innerHTML = $("#notesBox").val();
+        taggerCurrentFile.append(notes);
+        saveFileElement("Tag");
+    }
+}
+
+function saveFileElement(type)
+{
+    $("#segment" + type).children(".timeElement").each(function() {
+        node = xmlDoc.createElement(type);
+        node.innerHTML = $(this).children('.inputText')[0].value;
+        time = $(this).children('.inputTime')[0].value;
+        isTimed = $(this).children('.isTimedCheckbox')[0].checked;
+        node.setAttribute("time", time);
+        node.setAttribute("isTimed", isTimed);
+        taggerCurrentFile.append(node);
+    });
 }
 
 function setUpEditor()
@@ -215,11 +240,9 @@ function loadPreview()
 function loadFileMetadata()
 {
     children = taggerCurrentFile.children;
-        console.log(taggerCurrentFile);
     for (var ii = 0; ii < children.length; ii++)
     {
         thisChild = children[ii];
-        console.log(thisChild);
         if (thisChild.nodeName == "Notes")
         {
             $("#notesBox").val(thisChild.innerHTML);
@@ -258,7 +281,7 @@ function addTimeElement(segment, isTimed, time, text)
     element = $('<div class="timeElement"></div>');
     elementText = $('<input class="inputText" type="text" value="' + text + '"></input><br />');  //adding tag text box
     element.append(elementText);
-    elementCheck = '<span class="inputDesc">Is this timed?</span><input  type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
+    elementCheck = '<span class="inputDesc">Is this timed?</span><input class="isTimedCheckbox" type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
     element.append(elementCheck);
     elementTime = '<span class="inputDesc">Time: </span><input class="inputTime" type="text" value="' + time + '"></input><br />';    //adding time text
     element.append(elementTime);
