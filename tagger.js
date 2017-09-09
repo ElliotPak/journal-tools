@@ -161,6 +161,7 @@ function saveOldFile()
         notes.innerHTML = $("#notesBox").val();
         taggerCurrentFile.append(notes);
         saveFileElement("Tag");
+        saveFileElement("Quote");
     }
 }
 
