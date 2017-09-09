@@ -283,6 +283,11 @@ function jumpToTime(node)
     $("#preview")[0].currentTime = thisTime;
 }
 
+function deleteTimeElement(node)
+{
+    $(node).parent().remove();
+}
+
 function setToCurrentTime(node)
 {
     currentTime = $("#preview")[0].currentTime;
@@ -302,5 +307,7 @@ function addTimeElement(segment, isTimed, time, text)
     element.append(elementJump);
     elementSet = '<button onclick="setToCurrentTime(this)">Set to current time</button>';    //adding time jump button
     element.append(elementSet);
+    elementDel = '<button onclick="deleteTimeElement(this)">Delete this element</button>';    //adding time jump button
+    element.append(elementDel);
     $("#segment" + segment).append(element);
 }
