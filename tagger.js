@@ -262,7 +262,7 @@ function addTag(isNow)
     time = 0;
     if (isNow)
     {
-        time = $("#preview").currentTime;
+        time = $("#preview")[0].currentTime;
     }
     addTimeElement("Tag", isNow, time, "");
 }
@@ -272,7 +272,7 @@ function addQuote(isNow)
     time = 0;
     if (isNow)
     {
-        time = $("#preview").currentTime;
+        time = $("#preview")[0].currentTime;
     }
     addTimeElement("Quote", isNow, time, "");
 }
