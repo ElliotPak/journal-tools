@@ -299,9 +299,9 @@ function addTimeElement(segment, isTimed, time, text)
     element = $('<div class="timeElement"></div>');
     elementText = $('<input class="inputText" type="text" value="' + text + '"></input><br />');  //adding tag text box
     element.append(elementText);
-    elementCheck = '<span class="inputDesc">Is this timed?</span><input class="isTimedCheckbox" type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
+    elementCheck = '<span class="inputDesc">Is this timed? </span><input class="isTimedCheckbox" type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
     element.append(elementCheck);
-    elementTime = '<span class="inputDesc">Time: </span><input class="inputTime" type="text" value="' + time + '"></input><br />';    //adding time text
+    elementTime = '<span class="inputDesc"> Time: </span><input class="inputTime" type="text" value="' + time + '"></input><br />';    //adding time text
     element.append(elementTime);
     elementJump = '<button onclick="jumpToTime(this)">Jump to this time</button>';    //adding time jump button
     element.append(elementJump);

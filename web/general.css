@@ -145,3 +145,7 @@ body {
     font-size: 12px;
     color: #111;
 }
+
+.isTimedCheckbox {
+    margin-right: 5%;
+}
