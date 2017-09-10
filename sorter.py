@@ -371,9 +371,9 @@ def compileTags():
     '''
     Ensures that there's an entry in tags.xml for every file in a year folder
     '''
-    printStatus("============================================", True)
-    printStatus("Compiling all tag files into one big file...", True)
-    printStatus("============================================", True, "\n\n")
+    printStatus("=========================", True)
+    printStatus("Making a tags.xml file...", True)
+    printStatus("=========================", True, "\n\n")
     tagsCompiled = [[], []]
 
     xmlDoc = loadXmlDoc("tags.xml")
@@ -408,60 +408,80 @@ def finalMove():
             move(scriptPath + "/Unsorted/" + f, rawFolder)
     
 def printResults(date, time, compile, finalCopy):
-    print("===============")
-    print("Verbose output:")
-    print("===============")
+    print("=================")
+    print("||   SUMMARY:  ||")
+    print("=================")
+
+    output = []
 
     if date:
         if date[0]:
-            print("\nThe following files were successfully moved:")
+            output.append("\nThe following files were successfully moved:")
             for ii, jj in date[0].items():
                 text = "    " + ii + "\n      moved to " + jj
-                print(text)
+                output.append(text)
         if date[1]:
-            print("\nThe following files were already in their folders:")
+            output.append("\nThe following files were already in their folders:")
             for ii in date[1]:
-                print("    " + ii)
+                output.append("    " + ii)
         if date[2]:
-            print("\nThe following files weren't moved since they weren't journal files: ")
+            output.append("\nThe following files weren't moved since they weren't journal files: ")
             for ii in date[2]:
-                print("    " + ii)
+                output.append("    " + ii)
     if time:
         if time[0]:
-            print("\nThe following files were successfully renamed:")
+            output.append("\nThe following files were successfully renamed:")
             for ii, jj in time[0].items():
                 text = "    From: " + ii + "\n      To: " + jj
-                print(text)
+                output.append(text)
     if compile:
         if compile[0]:
-            print("\nThe following tags were compiled:")
+            output.append("\nThe following tags were compiled:")
             for ii in compile[0]:
-                print("    " + ii)
+                output.append("    " + ii)
         if compile[1]:
-            print("\nThe following tags were not compiled:")
+            output.append("\nThe following tags were not compiled:")
             for ii in compile[1]:
-                print("    " + ii)
+                output.append("    " + ii)
+    
+    if args.summary:
+        for a in output:
+            print(a)
+    
+    if args.summarytxt:
+        summaryPath = thisScriptPath() + "/Summary/"
+        if not os.path.exists(summaryPath):
+            os.makedirs(summaryPath)
+        filename = datetime.datetime.now().strftime("%d.%m.%y %I.%M.%S%p").lower() + ".txt"
+        with open(summaryPath + filename, "w") as f:
+            f.write("Elliot's Journal Sorter, Summary for " + filename + "\n\n")
+            for a in output:
+                f.write(a + "\n")
+        print("\nSaved a summary to \"" + summaryPath + filename + "\".")
+
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-c", "--compile", help="Combine all already existing tag files into one tag file in this script's directory", action="store_true")
+    argParser.add_argument("-c", "--compile", help="Create a tag entry in tags.xml for each sorted file", action="store_true")
     argParser.add_argument("-d", "--date", help="Put unsorted files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
     argParser.add_argument("--nofiles", help='''Doesn't actually move anything.''', action="store_true")
-    argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Always moves, even without --move''', action="store_true")
+    argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Moves regardless of --move (but won't if --nofiles is present)''', action="store_true")
     argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
     argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
     argParser.add_argument("--silent", help='Display no messages while anything occurs', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
-    argParser.add_argument("--verbose", help='''After the program is finished, display what happened to each file''', action="store_true")
+    argParser.add_argument("--summary", help='''After the program is finished, display what happened to each file on the monitor''', action="store_true")
+    argParser.add_argument("--summarytxt", help='''Like --summary, but prints to a text file instead, in "Summary/summary [current time]"''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
         argParser.print_help()
     return args
 
 if __name__ == "__main__":
+    print("\nElliot's Journal Sorter\n")
     resultsDate = []
     resultsTime = []
     resultsCompile = []
@@ -476,9 +496,9 @@ if __name__ == "__main__":
         resultsTime = sortTimes()
     if args.compile or args.all:
         resultsCompile = compileTags()
-        
-    print("\nAll operations completed!\n")
 
-    if args.verbose:
+    if args.summary or args.summarytxt:
         printResults(resultsDate, resultsTime, resultsCompile, [])
         #printResults(resultsDate, resultsTime, resultsCompile, resultsFinalMove)
+        
+    print("\nAll operations completed!\n")
