@@ -240,21 +240,19 @@ def getFolderNode(xmlDoc, folder):
         node = ET.SubElement(xmlDoc, "Folder", name=folder)
     return node
 
-def addTagChildren(node, files):
+def addTagChildren(node, files, tagsCompiled):
     '''
     for every entry in files, adds a child to node. The child is a "File" tag
     with a name attribute equal to the entry in "files".
     '''
-    tagsCompiled = [[], []]
     for f in files:
         if getTag(node, "File", f) == None:
             ET.SubElement(node, "File", name=f)
             tagsCompiled[0].append(f)
         else:
             tagsCompiled[1].append(f)
-    return tagsCompiled
 
-def tagCompileRecurse(xmlDoc, folderPath, folder):
+def tagCompileRecurse(xmlDoc, folderPath, folder, tagsCompiled):
     '''
     Runs through all files in folderPath/folder adds them to a list, to be
     added to xmlDoc as children [see addTagChildren()]. Calls itself on all
@@ -264,17 +262,14 @@ def tagCompileRecurse(xmlDoc, folderPath, folder):
     fullPath = thisScriptPath() + "/" + folderPath + folder + "/"
     folderContents = os.listdir(fullPath)
     files = []
-    tagsCompiled = [[], []]
 
     node = getFolderNode(xmlDoc, folder)
     for f in folderContents:
         if os.path.isdir(fullPath + f):
-            tagsCompiledNew = tagCompileRecurse(node, folderPath + folder + "/", f)
-            addToTagsCompiled(tagsCompiled, tagsCompiledNew)
+            tagCompileRecurse(node, folderPath + folder + "/", f, tagsCompiled)
         else:
             files.append(f)
-    tagsCompiledNew = addTagChildren(node, files)
-    addToTagsCompiled(tagsCompiled, tagsCompiledNew)
+    addTagChildren(node, files, tagsCompiled)
     return tagsCompiled
 
 def removeAnnoyingLines(elem):
@@ -303,11 +298,6 @@ def addToFilesSorted(filesSorted, filesSortedNew):
     for kk in [1, 2]:
         for ii in filesSortedNew[kk]:
             filesSorted.append[ii]
-
-def addToTagsCompiled(tagsCompiled, tagsCompiledNew):
-    for ii in [0, 1]:
-        for jj in tagsCompiledNew[ii]:
-            tagsCompiled[ii].append(jj)
 
 def sortDates():
     '''
@@ -378,9 +368,8 @@ def compileTags():
 
     xmlDoc = loadXmlDoc("tags.xml")
     yearFolders = getYearList(os.listdir(thisScriptPath()))
-    for i in yearFolders:
-        tagsCompiledNew = tagCompileRecurse(xmlDoc, "/", i)
-        addToTagsCompiled(tagsCompiled, tagsCompiledNew)
+    for ii in yearFolders:
+        tagCompileRecurse(xmlDoc, "/", ii, tagsCompiled)
     prettified = prettifyXml(xmlDoc)
     with open("tags.xml", "w") as f:
         f.write(prettified)
