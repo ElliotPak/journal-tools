@@ -317,7 +317,7 @@ def sortDates():
     for f in os.listdir(unsortedDir):
         date = datetimeFromFilename(f)
         if date != None:
-            path = date.strftime("%Y/%m/%d")
+            path = date.strftime("%Y/%m")
             if not isFileAlreadyHere(f, "/Unsorted/", path):
                 relocateFile("/Unsorted", path, f)
                 filesSorted[0][f] = path
