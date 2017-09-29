@@ -1,44 +1,63 @@
 <?xml version="1.0" ?>
 <Journals>
-	<Folder name="2009">
-		<File name="01 - 15.05.09 12.00am.txt">
-			<Tag time="6" isTimed="false">whoop de do</Tag>
-			<Notes>first journal!</Notes>
-		</File>
-		<File name="02 - 29.05.09 12.00am.txt"/>
-	</Folder>
-	<Folder name="2016">
-		<Folder name="06">
-			<Folder name="09">
-				<File name="01 - 09.06.16 06.43am.m4a"/>
-				<File name="02 - 09.06.16 10.09pm.m4a"/>
-				<File name="03 - 09.06.16 10.17pm.m4a"/>
-				<File name="04 - 09.06.16 10.24pm.m4a"/>
+	<Folder name="2017">
+		<Folder name="02">
+			<Folder name="28">
+				<File name="28.2.17 7.06am.txt"/>
+				<File name="28.2.17 12.01am.txt"/>
+				<File name="28.2.17 12.06am.txt"/>
 			</Folder>
-			<Folder name="12">
-				<File name="01 - 12.06.16 08.49pm.m4a"/>
-				<File name="02 - 12.06.16 08.54pm.m4a"/>
-				<File name="03 - 12.06.16 09.28pm.m4a"/>
+			<Folder name="23">
+				<File name="j 2017-02-23 22-04-48.txt"/>
 			</Folder>
 		</Folder>
-		<Folder name="10">
-			<Folder name="03">
-				<File name="01 - 03.10.16 12.36pm.mp3"/>
+		<Folder name="01">
+			<Folder name="01">
+				<File name="20170101030303.txt"/>
 			</Folder>
-			<Folder name="04">
-				<File name="01 - 04.10.16 12.05pm.mp3"/>
+		</Folder>
+		<Folder name="06">
+			<Folder name="13">
+				<File name="J 2017_06_13_22_04_38.txt"/>
+				<File name="13.6.17 2.56pm.txt"/>
 			</Folder>
-			<Folder name="06">
-				<File name="01 - 06.10.16 12.31pm.mp3"/>
+			<Folder name="15">
+				<File name="15.6.17 11.54am.txt"/>
+				<File name="15.6.17 1.54pm.txt"/>
 			</Folder>
-			<Folder name="07">
-				<File name="01 - 07.10.16 12.08pm.mp3"/>
+		</Folder>
+	</Folder>
+	<Folder name="2016">
+		<Folder name="08">
+			<Folder name="14">
+				<File name="2016_08_14_16_29_28.txt"/>
+			</Folder>
+		</Folder>
+		<Folder name="06">
+			<Folder name="26">
+				<File name="VID20160626151002.txt"/>
+			</Folder>
+			<Folder name="14">
+				<File name="VID20160614175838.txt"/>
 			</Folder>
 		</Folder>
 		<Folder name="11">
-			<Folder name="24">
-				<File name="01 - 24.11.16 09.44am.aac"/>
-				<File name="02 - 24.11.16 04.26pm.aac"/>
+			<Folder name="19">
+				<File name="J 2016-11-19 16-48-28.txt"/>
+			</Folder>
+			<Folder name="22">
+				<File name="j 2016-11-22 21-40-47.txt"/>
+			</Folder>
+		</Folder>
+		<Folder name="10">
+			<Folder name="04">
+				<File name="2016_10_04_12_05_43.txt"/>
+			</Folder>
+			<Folder name="15">
+				<File name="J 2016-10-15 17-57-41.txt"/>
+			</Folder>
+			<Folder name="29">
+				<File name="j 2016-10-29 17-25-38.txt"/>
 			</Folder>
 		</Folder>
 	</Folder>
