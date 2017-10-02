@@ -430,9 +430,9 @@ def printResults(date, time, compile, finalCopy):
 
 def get_arguments():
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-c", "--compile", help="Create a tag entry in tags.xml for each sorted file", action="store_true")
+    argParser.add_argument("-t", "--tag", help="Create a tag entry in tags.xml for each sorted file", action="store_true")
     argParser.add_argument("-d", "--date", help="Put unsorted files in date folders based on time in the filename", action="store_true")
-    argParser.add_argument("-t", "--time", help="Sort files in date folders based on time in the filename", action="store_true")
+    argParser.add_argument("-r", "--rename", help="Rename files to YYYY.MM.DD HH.MM.DD format", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
     argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
     argParser.add_argument("--nofiles", help='''Doesn't actually move anything.''', action="store_true")
@@ -460,9 +460,9 @@ if __name__ == "__main__":
         resultsDate = sortDates()
         if args.finalmove:
             resultsFinalMove = finalMove()
-    if args.time or args.all:
+    if args.rename or args.all:
         resultsTime = sortTimes()
-    if args.compile or args.all:
+    if args.tag or args.all:
         resultsCompile = compileTags()
 
     if args.summary or args.summarytxt:
