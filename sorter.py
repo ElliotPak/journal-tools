@@ -77,6 +77,7 @@ def datetimeFromFilename(filenameFull):
         "j %Y-%m-%d %H-%M-%S",
         "J %Y_%m_%d_%H_%M_%S",
         "j %Y_%m_%d_%H_%M_%S",
+        "%Y.%d.%m %I.%M%p",
         "%d.%m.%y %I.%M%p",
         "%Y%m%d%H%M%S",
         "%Y-%m-%d %H-%M-%S"
@@ -138,45 +139,24 @@ def renameFile(dir, filename, filenameNew):
         move(dirFull + "/" + filename, dirFull + "/" + filenameNew)
     printStatus("done!", False)
 
-def getOrderedFiles(files):
-    '''
-    Sorts the contents of the list "files" based on the datetime in each entry. 
-    Datetime is figured out with datetimeFromFilename()
-    '''
-    dictFiles = dict()
-    for i in files:  #sorting files in filePath based on time
-        fileTime = None
-        thisDatetime = datetimeFromFilename(i)
-        if thisDatetime:
-            dictFiles[i] = thisDatetime
-        else:
-            printStatus(i + " isn't a valid journal file, can't it sort by time.", False, marker="NoSort")
-    sortedList = sorted(dictFiles, key=dictFiles.get)
-    return sortedList
-
-def getSortedFilename(count, filename):
+def getSortedFilename(filename):
     '''
     gets the datetime from filename, converts it to DD.MM.YY mm.ss(am/pm)
     format, and renames it to that format. Also adds "count - " to the front
     '''
-    filenameNew = str(count) + " - "
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
-    filenameNew += fileTime.strftime("%d.%m.%y %I.%M%p").lower() + extension
-    if count < 10:
-        filenameNew = "0" + filenameNew
+    filenameNew = fileTime.strftime("%Y.%d.%m %I.%M%p").lower() + extension
     return filenameNew
 
-def formatNewFiles(orderedFiles, path):
+def formatNewFiles(fileList, path):
     '''
     Renames all files in orderedFiles to their sorted filename. 
     Sorted filename comes from getSortedFilename()
     '''
     filesSorted = {}
-    count = 0
-    for f in orderedFiles:
-        count += 1
-        filenameNew = getSortedFilename(count, f)
+    for f in fileList:
+        filenameNew = getSortedFilename(f)
         if (f != filenameNew):
             renameFile(path, f, filenameNew)
             filesSorted[f] = filenameNew
@@ -202,8 +182,7 @@ def sortTimeRecurse(path):
         else:
             fileList.append(f)
     if fileList:
-        orderedFiles = getOrderedFiles(fileList)
-        filesSorted[0] = formatNewFiles(orderedFiles, path + "/")
+        filesSorted[0] = formatNewFiles(fileList, path + "/")
     return filesSorted
 
 def loadXmlDoc(filename):
