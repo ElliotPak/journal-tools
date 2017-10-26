@@ -500,5 +500,6 @@ if __name__ == "__main__":
     if args.summary or args.summarytxt:
         printResults(resultsDate, resultsTime, resultsCompile, resultsUnsorted, [])
         #printResults(resultsDate, resultsTime, resultsCompile, resultsFinalMove)
-        
-    print("\nAll operations completed!\n")
+    
+    if len(sys.argv) != 1:
+        print("\nAll operations completed!\n")
