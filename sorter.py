@@ -77,8 +77,8 @@ def datetimeFromFilename(filenameFull):
         "j %Y-%m-%d %H-%M-%S",
         "J %Y_%m_%d_%H_%M_%S",
         "j %Y_%m_%d_%H_%M_%S",
-        "%Y.%d.%m %H.%M",
-        "%Y.%d.%m %I.%M%p",
+        "%Y.%m.%d %H.%M",
+        "%Y.%m.%d %I.%M%p",
         "%d.%m.%y %I.%M%p",
         "%Y%m%d%H%M%S",
         "%Y-%m-%d %H-%M-%S"
