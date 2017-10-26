@@ -149,40 +149,53 @@ def getSortedFilename(filename):
     filenameNew = fileTime.strftime("%Y.%d.%m %I.%M%p").lower() + extension
     return filenameNew
 
-def formatNewFiles(fileList, path):
+def formatNewFiles(fileList, path, filesSorted):
     '''
     Renames all files in orderedFiles to their sorted filename. 
     Sorted filename comes from getSortedFilename()
     '''
-    filesSorted = {}
     for f in fileList:
         filenameNew = getSortedFilename(f)
         if (f != filenameNew):
             renameFile(path, f, filenameNew)
-            filesSorted[f] = filenameNew
+            filesSorted[0][f] = filenameNew
         else:
             printStatus(f + " already has a valid name, skipping...", False, marker="NoRenm")
     return filesSorted
 
-def sortTimeRecurse(path):
+def sortTimeRecurse(path, filesSorted):
     '''
     Runs through all files in "path" and renames them based on the file time
     that is retrieved through its name. 
     Also calls itself on all folders in path. 
     Returns the amount of files sorted.  
     '''
-    filesSorted = [{}, [], []]
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
     fileList = []
     for f in folderContents:
         if os.path.isdir(fullPath + f):
-            filesSortedNew = sortTimeRecurse(path + "/" + f)
-            addToFilesSorted(filesSorted, filesSortedNew)
+            sortTimeRecurse(path + "/" + f, filesSorted)
         else:
             fileList.append(f)
     if fileList:
-        filesSorted[0] = formatNewFiles(fileList, path + "/")
+        formatNewFiles(fileList, path + "/", filesSorted)
+    return filesSorted
+
+def unsortRecurse(path, filesSorted):
+    '''
+    Runs through all files in "path" and moves them back to Unsorted. 
+    Also calls itself on all folders in path. 
+    Returns the amount of files sorted.  
+    '''
+    fullPath = thisScriptPath() + "/" + path + "/"
+    folderContents = os.listdir(fullPath)
+    for f in folderContents:
+        if os.path.isdir(fullPath + f):
+            unsortRecurse(path + "/" + f, filesSorted)
+        else:
+            filesSorted.append(f)
+            move(fullPath + f, thisScriptPath() + "/Unsorted")
     return filesSorted
 
 def loadXmlDoc(filename):
@@ -270,14 +283,6 @@ def prettifyXml(element):
     toReturn = reparsed.toprettyxml(indent="\t")
     return toReturn
 
-def addToFilesSorted(filesSorted, filesSortedNew):
-    for ii, jj in filesSortedNew[0].items():
-        if ii != jj:
-            filesSorted[0][ii] = jj
-    for kk in [1, 2]:
-        for ii in filesSortedNew[kk]:
-            filesSorted.append[ii]
-
 def sortDates():
     '''
     Moves (or copies) all files in /Unsorted to folders based on the date in
@@ -326,14 +331,34 @@ def sortTimes():
     filesSorted = [{}, [], []]      #[successfully sorted, already sorted, not a journal file]
     yearFolders = getYearList(os.listdir(thisScriptPath()))
     for i in yearFolders:
-        filesSortedNew = sortTimeRecurse(i)
-        addToFilesSorted(filesSorted, filesSortedNew)
+        sortTimeRecurse(i, filesSorted)
 
     filesSortedAmount = len(filesSorted[0])
     if filesSortedAmount > 0:
         printStatus("\nRenaming done! " + str(filesSortedAmount) + " files renamed", True, "\n\n")
     else:
         printStatus("\nNo files renamed.", True, "\n\n")
+    return filesSorted
+
+def unsort():
+    '''
+    goes through each year folder (and its subfolders) and moves all files
+    back into /Unsorted
+    '''
+    printStatus("==================", True)
+    printStatus("Unsorting files...", True)
+    printStatus("==================", True, "\n\n")
+
+    filesSorted = []
+    yearFolders = getYearList(os.listdir(thisScriptPath()))
+    for i in yearFolders:
+        unsortRecurse(i, filesSorted)
+
+    filesSortedAmount = len(filesSorted)
+    if filesSortedAmount > 0:
+        printStatus("\nUnsorting done! " + str(filesSortedAmount) + " files unsorted", True, "\n\n")
+    else:
+        printStatus("\nNo files unsorted.", True, "\n\n")
     return filesSorted
 
 def compileTags():
@@ -450,12 +475,15 @@ def get_arguments():
 
 if __name__ == "__main__":
     print("\nElliot's Journal Sorter\n")
+    resultsUnsorted = []
     resultsDate = []
     resultsTime = []
     resultsCompile = []
     resultsFinalMove = []
 
     args = get_arguments()
+    if args.unsort:
+        resultsUnsorted = unsort()
     if args.date or args.all:
         resultsDate = sortDates()
         if args.finalmove:
@@ -466,7 +494,7 @@ if __name__ == "__main__":
         resultsCompile = compileTags()
 
     if args.summary or args.summarytxt:
-        printResults(resultsDate, resultsTime, resultsCompile, [])
+        printResults(resultsDate, resultsTime, resultsCompile, resultsUnsorted, [])
         #printResults(resultsDate, resultsTime, resultsCompile, resultsFinalMove)
         
     print("\nAll operations completed!\n")

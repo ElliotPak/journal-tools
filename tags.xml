@@ -10,11 +10,16 @@
 			<Folder name="23">
 				<File name="j 2017-02-23 22-04-48.txt"/>
 			</Folder>
+			<File name="2017.23.02 10.04pm.txt"/>
+			<File name="2017.28.02 07.06am.txt"/>
+			<File name="2017.28.02 12.06am.txt"/>
+			<File name="2017.28.02 12.01am.txt"/>
 		</Folder>
 		<Folder name="01">
 			<Folder name="01">
 				<File name="20170101030303.txt"/>
 			</Folder>
+			<File name="2017.01.01 03.03am.txt"/>
 		</Folder>
 		<Folder name="06">
 			<Folder name="13">
@@ -25,6 +30,10 @@
 				<File name="15.6.17 11.54am.txt"/>
 				<File name="15.6.17 1.54pm.txt"/>
 			</Folder>
+			<File name="2017.13.06 02.56pm.txt"/>
+			<File name="2017.15.06 11.54am.txt"/>
+			<File name="2017.13.06 10.04pm.txt"/>
+			<File name="2017.15.06 01.54pm.txt"/>
 		</Folder>
 	</Folder>
 	<Folder name="2016">
@@ -32,6 +41,7 @@
 			<Folder name="14">
 				<File name="2016_08_14_16_29_28.txt"/>
 			</Folder>
+			<File name="2016.14.08 04.29pm.txt"/>
 		</Folder>
 		<Folder name="06">
 			<Folder name="26">
@@ -40,6 +50,8 @@
 			<Folder name="14">
 				<File name="VID20160614175838.txt"/>
 			</Folder>
+			<File name="2016.26.06 03.10pm.txt"/>
+			<File name="2016.14.06 05.58pm.txt"/>
 		</Folder>
 		<Folder name="11">
 			<Folder name="19">
@@ -48,6 +60,8 @@
 			<Folder name="22">
 				<File name="j 2016-11-22 21-40-47.txt"/>
 			</Folder>
+			<File name="2016.22.11 09.40pm.txt"/>
+			<File name="2016.19.11 04.48pm.txt"/>
 		</Folder>
 		<Folder name="10">
 			<Folder name="04">
@@ -59,6 +73,9 @@
 			<Folder name="29">
 				<File name="j 2016-10-29 17-25-38.txt"/>
 			</Folder>
+			<File name="2016.04.10 12.05pm.txt"/>
+			<File name="2016.15.10 05.57pm.txt"/>
+			<File name="2016.29.10 05.25pm.txt"/>
 		</Folder>
 	</Folder>
 </Journals>
