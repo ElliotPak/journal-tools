@@ -400,13 +400,17 @@ def finalMove():
         if not args.nofiles:
             move(scriptPath + "/Unsorted/" + f, rawFolder)
     
-def printResults(date, time, compile, finalCopy):
+def printResults(date, time, compile, unsorted, finalCopy):
     print("=================")
     print("||   SUMMARY:  ||")
     print("=================")
 
     output = []
 
+    if unsorted:
+        output.append("\nThe following files were unsorted:")
+        for ii in unsorted:
+            output.append("    " + ii)
     if date:
         if date[0]:
             output.append("\nThe following files were successfully moved:")
@@ -459,14 +463,14 @@ def get_arguments():
     argParser.add_argument("-d", "--date", help="Put unsorted files in date folders based on time in the filename", action="store_true")
     argParser.add_argument("-r", "--rename", help="Rename files to YYYY.MM.DD HH.MM.DD format", action="store_true")
     argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
-    argParser.add_argument("--move", help='Move files instead of copying them', action="store_true")
-    argParser.add_argument("--nofiles", help='''Doesn't actually move anything.''', action="store_true")
-    argParser.add_argument("--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Moves regardless of --move (but won't if --nofiles is present)''', action="store_true")
-    argParser.add_argument("--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
-    argParser.add_argument("--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
-    argParser.add_argument("--silent", help='Display no messages while anything occurs', action="store_true")
+    argParser.add_argument("-m", "--move", help='Move files instead of copying them', action="store_true")
+    argParser.add_argument("-n", "--nofiles", help='''Doesn't actually move anything.''', action="store_true")
+    argParser.add_argument("-f", "--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Moves regardless of --move (but won't if --nofiles is present)''', action="store_true")
+    argParser.add_argument("-u", "--unsort", help='Copy sorted files back into /Unsorted', action="store_true")
+    argParser.add_argument("-q", "--quiet", help='Only display messages about what major tasks are being done, and their results', action="store_true")
+    argParser.add_argument("-s", "--silent", help='Display no messages while anything occurs', action="store_true")
     argParser.add_argument("--nomarker", help='''Don't display the markers [like this] before terminal output''', action="store_true")
-    argParser.add_argument("--summary", help='''After the program is finished, display what happened to each file on the monitor''', action="store_true")
+    argParser.add_argument("--summary", help='''After the program is finished, display what happened to each file in the terminal''', action="store_true")
     argParser.add_argument("--summarytxt", help='''Like --summary, but prints to a text file instead, in "Summary/summary [current time]"''', action="store_true")
     args = argParser.parse_args()
     if len(sys.argv) == 1:
