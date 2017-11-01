@@ -99,8 +99,11 @@ def datetimeFromFilename(filenameFull):
     for ii, jj in toRegexSearch:
         match = re.search(jj, filename)
         if match and not found:
-            found = True
-            thisDatetime = datetime.datetime.strptime(match.group(0), ii)
+            try:
+                thisDatetime = datetime.datetime.strptime(match.group(0), ii)
+                found = True
+            except ValueError:
+                pass
     if thisDatetime != None:
         thisDatetime = thisDatetime.replace(second=0)
     return thisDatetime
@@ -147,7 +150,7 @@ def getSortedFilename(filename):
     '''
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
-    filenameNew = fileTime.strftime("%Y.%d.%m %I.%M%p").lower() + extension
+    filenameNew = fileTime.strftime("%Y.%m.%d %I.%M%p").lower() + extension
     return filenameNew
 
 def formatNewFiles(fileList, path, filesSorted):
