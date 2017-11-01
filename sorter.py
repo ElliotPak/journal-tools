@@ -150,7 +150,7 @@ def getSortedFilename(filename):
     '''
     fileTime = datetimeFromFilename(filename)
     extension = os.path.splitext(filename)[1]
-    filenameNew = fileTime.strftime("%Y.%m.%d %I.%M%p").lower() + extension
+    filenameNew = fileTime.strftime("%Y.%m.%d %H.%M").lower() + extension
     return filenameNew
 
 def formatNewFiles(fileList, path, filesSorted):
