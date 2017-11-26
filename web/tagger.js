@@ -142,7 +142,7 @@ function editFile(name)
     setUpEditor();
     $("#filename").html(name);
     taggerCurrentFile = getFileNode(name);
-    loadPreview();
+    loadPreview(name);
     loadFileMetadata();
 }
 
@@ -228,28 +228,11 @@ function getFileNode(name)
     return toReturn;
 }
 
-function loadPreview()
+function loadPreview(name)
 {
-    filename = taggerCurrentFile.getAttribute("name");
-    extension = filename.split('.').pop();
-    previewText = "";
-    switch(extension)
-    {
-        case "mp3":
-            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp3" /></audio>';
-            break;
-        case "m4a":
-            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
-            break;
-        case "aac":
-            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/aac" /></audio>';
-            break;
-        case "mp4":
-            previewText = '<video id="preview" controls="" class="previewVideo"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
-            break;
-    }
+    element = createPreview(getPathName(), name);
     $("#segmentPreview").append("<br />");
-    $("#segmentPreview").append(previewText);
+    $("#segmentPreview").append(element);
 }
 
 function loadFileMetadata()
