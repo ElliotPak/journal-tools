@@ -80,13 +80,14 @@ def datetimeFromFilename(filenameFull):
         "%Y.%m.%d %H.%M",
         "%Y.%m.%d %I.%M%p",
         "%d.%m.%y %I.%M%p",
+        "%Y.%d.%m %I.%M%p",
         "%Y%m%d%H%M%S",
         "%Y-%m-%d %H-%M-%S"
     ]
     for f in formats:
         if not found:
             try:
-                thisDatetime = datetime.datetime.strptime(filename, f)
+                thisDatetime = datetime.datetime.strptime(filename.upper(), f)
                 found = True
             except ValueError:
                 pass
@@ -198,8 +199,14 @@ def unsortRecurse(path, filesSorted):
         if os.path.isdir(fullPath + f):
             unsortRecurse(path + "/" + f, filesSorted)
         else:
-            filesSorted.append(f)
-            move(fullPath + f, thisScriptPath() + "/Unsorted")
+            try:
+                printStatus("Moving file " + f + "...", False, " ", " Move ")
+                move(fullPath + f, thisScriptPath() + "/Unsorted")
+                filesSorted.append(f)
+                printStatus(" done!")
+            except:
+                printStatus(" failed (file most likely is already in Unsorted)")
+                
     return filesSorted
 
 def loadXmlDoc(filename):
