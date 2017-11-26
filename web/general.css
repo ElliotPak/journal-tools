@@ -136,6 +136,12 @@ body {
     height:50%;
 }
 
+.previewVideo {
+    margin: 10px;
+    width: calc(95% - 20px);
+    height: 65%;
+}
+
 .previewAudio {
     width: 95%;
 }

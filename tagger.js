@@ -242,9 +242,11 @@ function loadPreview()
             previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
             break;
         case "aac":
-            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            previewText = '<audio id="preview" controls="" class="previewAudio"><source src=".' + getPathName() + filename + '" type="audio/aac" /></audio>';
             break;
-        
+        case "mp4":
+            previewText = '<video id="preview" controls="" class="previewVideo"><source src=".' + getPathName() + filename + '" type="audio/mp4" /></audio>';
+            break;
     }
     $("#segmentPreview").append("<br />");
     $("#segmentPreview").append(previewText);
