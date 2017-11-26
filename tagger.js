@@ -6,10 +6,17 @@ taggerCurrentFile = null;
 function startEditing(xmlNode)
 {
     taggerCurrentDir = xmlNode;
+    removeOldFileStuff();
     clearChildrenList();
     displayPath();
     makeChildrenList(xmlNode.children);
-    $('#notSidebar').append('<button onclick="saveFile();">Save file</button>');
+    $('#buttonSave').css('visibility', 'visible');
+}
+
+function saveTagFile()
+{
+    saveOldFile();
+    saveFile();
 }
 
 function browseFolder(name)
@@ -133,6 +140,7 @@ function editFile(name)
     saveOldFile()
     removeOldFileStuff();
     setUpEditor();
+    $("#filename").html(name);
     taggerCurrentFile = getFileNode(name);
     loadPreview();
     loadFileMetadata();
@@ -193,6 +201,10 @@ function setUpEditor()
         $("#segmentQuote").append('<button onclick="addQuote(false);">Add quote</button>');
         $("#segmentQuote").append('<button onclick="addQuote(true);">Add quote at current time</button>');
         $("#segmentMisc").append('<div class="halfVSegment" id="segmentPreview"></div>');
+        $("#segmentPreview").append('<span class="pathHeader">Current file:</span>');
+        $("#segmentPreview").append('<br />');
+        $("#segmentPreview").append('<span class="pathActual" id="filename"></span>');
+        $("#segmentPreview").append('<br />');
         $("#segmentPreview").append('<span class="segmentHeader">Preview:</span>');
         $("#segmentMisc").append('<div class="halfVSegment" id="segmentNotes"></div>');
         $("#segmentNotes").append('<span class="segmentHeader">Notes:</span><br />>');

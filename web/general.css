@@ -79,6 +79,17 @@ body {
     overflow-y: scroll;
 }
 
+#buttonLoad {
+    visibility:visible;
+    float:left;
+    margin-left: 10px;
+}
+#buttonSave {
+    visibility:hidden;
+    float:right;
+    margin-right: 10px;
+}
+
 .sidebarFolder{
     font-size: 18px;
     color: #6FF;
