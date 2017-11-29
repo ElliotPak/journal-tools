@@ -1,16 +1,21 @@
 xmlDoc = null;
 
-function loadFile()
+function loadXmlFile()
 {
-    $.get('./tags.xml', function(data) {
-        xmlDoc = data;
-        if (typeof window.taggerLoaded != 'undefined')
-        {
-            startEditing(xmlDoc.documentElement);
-        }
-        if (typeof window.searcherLoaded != 'undefined')
-        {
-            startSearching(xmlDoc.documentElement);
+    $.ajax({
+        type: "GET",
+        url: "tags.xml",
+        dataType: "xml",
+        success: function(data) {
+            xmlDoc = data;
+            if (typeof window.taggerLoaded != 'undefined')
+            {
+                startEditing($(data));
+            }
+            if (typeof window.searcherLoaded != 'undefined')
+            {
+                startSearching($(data));
+            }
         }
     });
 }

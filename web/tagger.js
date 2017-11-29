@@ -5,11 +5,11 @@ taggerCurrentFile = null;
 
 function startEditing(xmlNode)
 {
-    taggerCurrentDir = xmlNode;
+    taggerCurrentDir = xmlNode.children()[0];
     removeOldFileStuff();
     clearChildrenList();
     displayPath();
-    makeChildrenList(xmlNode.children);
+    makeChildrenList(xmlNode.children());
     $('#buttonSave').css('visibility', 'visible');
 }
 
@@ -19,28 +19,17 @@ function saveTagFile()
     saveFile();
 }
 
-function browseFolder(name)
+function browseFolder(ii)
 {
-    children = taggerCurrentDir.children;
-    for (var ii = 0; ii < children.length; ii++)
-    {
-        thisChild = children[ii];
-        thisName = thisChild.getAttribute("name");
-        if (thisChild.nodeName == "Folder" && thisName == name)
-        {
-            (function() {
-                taggerCurrentDir = thisChild;
-                clearChildrenList();
-                addParent();
-                makeChildrenList(taggerCurrentDir.children);
-                displayPath();
-            })();
-        }
-    }
+    thisNode = $(taggerCurrentDir).children()[ii];
+    taggerCurrentDir = thisNode;
+    clearChildrenList();
+    addParent();
+    makeChildrenList($(taggerCurrentDir));
+    displayPath();
 }
 
-function backFolder()
-{
+function changeSidebar() {
     clearChildrenList();
     taggerCurrentDir = taggerCurrentDir.parentNode;
     if (taggerCurrentDir.parentNode.nodeName != "#document")
@@ -51,14 +40,26 @@ function backFolder()
     displayPath();
 }
 
+function backFolder()
+{
+    clearChildrenList();
+    taggerCurrentDir = taggerCurrentDir.parentNode;
+    if (taggerCurrentDir.parentNode.nodeName != "#document")
+    {
+        addParent();
+    }
+    makeChildrenList($(taggerCurrentDir));
+    displayPath();
+}
+
 function addParent()
 {
-    link = document.createElement("a");
+/*    link = document.createElement("a");
     link.href = "#";
     link.innerText = "<== back";
     link.classList.add("sidebarFolder");
-    link.onclick = function() {backFolder();};
-    $("#container").append(link);
+    link.onclick = function() {backFolder();}; */
+    $("#container").append('<a href="#" class="sidebarFolder" onclick="backFolder()">\<== back</a>');
     $("#container").append(document.createElement("br"));
 }
 
@@ -67,81 +68,63 @@ function clearChildrenList()
     $("#container").empty();
 }
 
-function makeChildrenList(children)
+function makeChildrenList(parent)
 {
-    for (ii = 0; ii < children.length; ii++)
+    ii = 0;
+    parent.children().each(function()
     {
-        thisChild = children[ii];
-        link = document.createElement("a");
-        link.href = "#";
-        thisName = thisChild.getAttribute("name");
-        link.innerText = thisName;
-        if (thisChild.nodeName == "Folder")
+        link = '<a href="#" class="sidebarTYPE" onclick="FUNC(' + ii + ')">' + $(this).attr("name") + '</a>';
+        if (this.nodeName === "Folder")
         {
-            link.classList.add("sidebarFolder");
-            link.onclick = (function(jj) {
-                return function() {
-                    browseFolder(children[jj].getAttribute("name"));
-                };
-            })(ii);
+            link = link.replace("sidebarTYPE", "sidebarFolder");
+            link = link.replace("FUNC", "browseFolder");
         }
-        if (thisChild.nodeName == "File")
+        else if (this.nodeName === "File")
         {
-            link.classList.add("sidebarFile");
-            link.onclick = (function(jj) {
-                return function() {
-                    editFile(children[jj].getAttribute("name"));
-                };
-            })(ii);
+            link = link.replace("sidebarTYPE", "sidebarFile");
+            link = link.replace("FUNC", "editFile");
         }
         $("#container").append(link);
-        $("#container").append(document.createElement("br"));
-    }
+        $("#container").append("<br />");
+        ii++;
+    });
 }
 
 function displayPath()
 {
     if ($(".pathActual").length == 0)
     {
-        $("#sidebar").prepend(document.createElement("br"));
-        span = document.createElement("span");
-        span.innerText = getPathName();
-        span.classList.add("pathActual")
-        $("#sidebar").prepend(span)
-        $("#sidebar").prepend(document.createElement("br"));
+        $("#sidebar").prepend("<br>");
+        $('#sidebar').prepend('<span class="pathActual">' + getPathName() + '</span>')
+        $("#sidebar").prepend("<br>");
+        $('#sidebar').prepend('<span class="pathHeader">Current path:</span>')
     }
-    else{
-        $(".pathActual")[0].innerText = getPathName();
-    }
-    if ($(".pathHeader").length == 0)
+    else
     {
-        $("#sidebar").prepend(document.createElement("br"));
-        span = document.createElement("span");
-        span.innerText = "Current path:";
-        span.classList.add("pathHeader");
-        $("#sidebar").prepend(span);
+        $(".pathActual")[0].innerText = getPathName();
     }
 }
 
 function getPathName()
 {
-    node = taggerCurrentDir;
+    node = $(taggerCurrentDir);
     path = "/"
-    while(node.parentNode.nodeName != "#document")
+    while(node.parent()[0].nodeName != "#document")
     {
-        path = "/" + node.getAttribute("name") + path;
-        node = node.parentNode;
+        path = "/" + node.attr("name") + path;
+        node = node.parent();
     }
     return path;
 }
 
-function editFile(name)
+function editFile(ii)
 {
     saveOldFile()
     removeOldFileStuff();
     setUpEditor();
+    taggerCurrentFile = $(taggerCurrentDir).children()[ii];
+    name = $(taggerCurrentFile).attr("name");
     $("#filename").html(name);
-    taggerCurrentFile = getFileNode(name);
     loadPreview(name);
     loadFileMetadata();
 }
