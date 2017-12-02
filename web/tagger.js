@@ -149,7 +149,7 @@ function saveOldFile()
         }
 
         notes = xmlDoc.createElement("Notes");
-        notes.innerHTML = $("#notesBox").val();
+        notes.innerHTML = sanitiseXmlText($("#notesBox").val());
         taggerCurrentFile.append(notes);
         saveFileElement("Tag");
         saveFileElement("Quote");
@@ -160,10 +160,10 @@ function saveFileElement(type)
 {
     $("#segment" + type).children(".timeElement").each(function() {
         node = xmlDoc.createElement(type);
-        node.innerHTML = $(this).children('.inputText')[0].value;
+        node.innerHTML = sanitiseXmlText($(this).children('.inputText')[0].value);
         time = $(this).children('.inputTime')[0].value;
         isTimed = $(this).children('.isTimedCheckbox')[0].checked;
-        node.setAttribute("time", time);
+        node.setAttribute("time", sanitiseXmlText(time));
         node.setAttribute("isTimed", isTimed);
         taggerCurrentFile.append(node);
     });
@@ -226,7 +226,7 @@ function loadFileMetadata()
         thisChild = children[ii];
         if (thisChild.nodeName == "Notes")
         {
-            $("#notesBox").val(thisChild.innerHTML);
+            $("#notesBox").val(decodeXmlText(thisChild.innerHTML));
         }
         else if (thisChild.nodeName == "Tag" || thisChild.nodeName == "Quote")
         {
@@ -277,11 +277,11 @@ function setToCurrentTime(node)
 function addTimeElement(segment, isTimed, time, text)
 {
     element = $('<div class="timeElement"></div>');
-    elementText = $('<input class="inputText" type="text" value="' + text + '"></input><br />');  //adding tag text box
+    elementText = $('<input class="inputText" type="text" value="' + decodeXmlText(text) + '"></input><br />');  //adding tag text box
     element.append(elementText);
     elementCheck = '<span class="inputDesc">Is this timed? </span><input class="isTimedCheckbox" type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
     element.append(elementCheck);
-    elementTime = '<span class="inputDesc"> Time: </span><input class="inputTime" type="text" value="' + time + '"></input><br />';    //adding time text
+    elementTime = '<span class="inputDesc"> Time: </span><input class="inputTime" type="text" value="' + decodeXmlText(time) + '"></input><br />';    //adding time text
     element.append(elementTime);
     elementJump = '<button onclick="jumpToTime(this)">Jump to this time</button>';    //adding time jump button
     element.append(elementJump);
@@ -290,4 +290,20 @@ function addTimeElement(segment, isTimed, time, text)
     elementDel = '<button onclick="deleteTimeElement(this)">Delete this element</button>';    //adding time jump button
     element.append(elementDel);
     $("#segment" + segment).append(element);
+}
+
+function sanitiseXmlText(inText)
+{
+    outText = inText.replace('"', "\"");
+    outText = outText.replace("'", '\'');
+    outText = $('<div/>').text(outText).html();
+    return outText;
+}
+
+function decodeXmlText(inText)
+{
+    outText = inText.replace(/&gt;/g, ">");
+    outText = outText.replace(/&lt;/g, "<");
+    outText = outText.replace(/&amp;/g, "&");
+    return outText;
 }
