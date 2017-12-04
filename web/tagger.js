@@ -294,15 +294,19 @@ function addTimeElement(segment, isTimed, time, text)
 
 function sanitiseXmlText(inText)
 {
-    outText = inText.replace('"', "\"");
-    outText = outText.replace("'", '\'');
+    outText = inText + '';
     outText = $('<div/>').text(outText).html();
+    outText = outText.replace('"', "&quot;");
+    outText = outText.replace("'", '&apos;');
     return outText;
 }
 
 function decodeXmlText(inText)
 {
-    outText = inText.replace(/&gt;/g, ">");
+    outText = inText + '';
+    outText = outText.replace(/&quot;/g, '"');
+    outText = outText.replace(/&apos;/g, "'");
+    outText = outText.replace(/&gt;/g, ">");
     outText = outText.replace(/&lt;/g, "<");
     outText = outText.replace(/&amp;/g, "&");
     return outText;
