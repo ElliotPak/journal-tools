@@ -12,7 +12,7 @@ function loadXmlFile()
             {
                 startEditing($(data));
             }
-            if (typeof window.searcherLoaded != 'undefined')
+            if (typeof window.searchLoaded != 'undefined')
             {
                 startSearching($(data));
             }

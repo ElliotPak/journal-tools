@@ -54,10 +54,17 @@ body {
     margin:auto;
 }
 
+#results {
+    height:calc(100% - 40px);
+    width:100%;
+    text-align: left;
+    overflow-y: scroll;
+}
+
 #editor {
     height:calc(100% - 40px);
     width:100%;
-    text-align: cente;
+    text-align: center;
 }
 
 #container {
@@ -161,4 +168,40 @@ body {
 
 .isTimedCheckbox {
     margin-right: 10%;
+}
+
+.displayFile {
+    margin: 10px 20px;
+    width: calc(100% - 60px);
+    background-color: #E4E4E4;
+    display: inline-block;
+    padding: 10px;
+}
+
+.displayHalf {
+    width: 49%;
+    height: 100%;
+    padding: 10px 0px 20px 0px;
+    float: left;
+    display: inline-block;
+}
+
+.displayFilename {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.displaySubheader {
+    font-size: 22px;
+    text-decoration: underline;
+}
+
+.displayText {
+    font-size: 16px;
+    color: #222;
+}
+
+.displayTimecode {
+    font-size: 16px;
+    color: #444;
 }
