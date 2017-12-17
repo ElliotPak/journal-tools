@@ -23,32 +23,40 @@ function displayFiles(list)
     }
 }
 
+function getTimeElements(node, type)
+{
+    elements = [];
+    $(node).find(type).each( function() {
+        text = '<span class="displayText">' + this.innerHTML + '</span>';
+        if ($(node).attr("isTimed") === "true")
+        {
+            text += '<span class="displayTimecode"> @' + $(this).attr("time") + '</span>';
+        }
+        elements.push(text);
+    });
+    return elements;
+}
+
 function displayFile(file)
 {
     halfTag = $('<div class="displayHalf"></div>');
     halfTag.append('<span class="displaySubheader">Tags:</span><br>');
-    $(file).find("Tag").each(function() {
-        tagSpan = $('<span class="displayText">' + this.innerHTML + '</span>');
-        halfTag.append(tagSpan);
-        if ($(this).attr("isTimed") === "true")
-        {
-            timeSpan = $('<span class="displayTimecode"> @' + $(this).attr("time") + '</span>');
-            halfTag.append(timeSpan);
-        }
-        halfTag.append("<br>");
+    tagList = $('<ul class="tagList"></ul>');
+    halfTag.append(tagList);
+    tags = getTimeElements(file, "Tag");
+    tags.forEach( function(entry) {
+        tagEntry = $("<li>" + entry + "</li>")
+        tagList.append(tagEntry);
     });
 
     halfQuote = $('<div class="displayHalf"></div>');
     halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
-    $(file).find("Quote").each(function() {
-        tagSpan = $('<span class="displayText">' + this.innerHTML + '</span>');
-        halfQuote.append(tagSpan);
-        if ($(this).attr("isTimed") === "true")
-        {
-            timeSpan = $('<span class="displayTimecode"> @' + $(this).attr("time") + '</span>');
-            halfQuote.append(timeSpan);
-        }
-        halfQuote.append("<br>");
+    quoteList = $('<ul class="quoteList"></ul>');
+    halfQuote.append(quoteList);
+    quotes = getTimeElements(file, "Quote");
+    quotes.forEach( function(entry) {
+        quoteEntry = $("<li>" + entry + "</li>")
+        quoteList.append(quoteEntry);
     });
 
     displayNode = $('<div class="displayFile"></div>');
