@@ -5,7 +5,6 @@ listOfFiles = [];
 function startSearching(xmlNode)
 {
     getListOfFiles(xmlNode);
-    displayFiles(listOfFiles);
 }
 
 function getListOfFiles(xmlNode)
@@ -15,6 +14,61 @@ function getListOfFiles(xmlNode)
     });
 }
 
+function performSearch(button)
+{
+    $("#results").empty();
+    input = $(button).parent().find("input");
+    settings = {term : input[0].value, searchtype: "tfnp"};
+    list = searchFiles(listOfFiles, settings);
+}
+
+function searchFiles(fileList, settings)
+{
+    resultList = [];
+    for (ii = 0; ii < fileList.length; ii++)
+    {
+        if (doesFileMatch(fileList[ii], settings))
+        {
+            resultList.push(fileList[ii]);
+        }
+    }
+    return resultList;
+}
+
+function doesFileMatch(file, settings)
+{
+    match = false;
+    jj = 0
+    if (file.notes.indexOf(settings.term) !== -1)
+    {
+        match = true;
+    }
+    while (jj < file.tags.length && !match)
+    {
+        tagText = file.tags[jj].text;
+        if (tagText.indexOf(settings.term) !== -1)
+        {
+            match = true;
+        }
+        jj++;
+    }
+    jj = 0;
+    while (jj < file.quotes.length && !match)
+    {
+        tagText = file.quotes[jj].text;
+        if (tagText.indexOf(settings.term) !== -1)
+        {
+            match = true;
+        }
+        jj++;
+    }
+    if (match === true)
+    {
+        displayFile(file);
+    }
+    return match;
+}
+
 function getNoteContents(file)
 {
     toReturn = "";
@@ -22,7 +76,6 @@ function getNoteContents(file)
     if (noteSelector.length > 0)
     {
         node = noteSelector[0];
-        console.log(noteSelector[0]);
         toReturn = node.innerHTML;
         toReturn = toReturn.replace(/\n/g, "<br />");
     }
@@ -77,6 +130,7 @@ function getTimeElementsHTML(node, type)
 
 function displayFiles(list)
 {
+    $("#results").empty();
     for (ii = 0; ii < list.length; ii++)
     {
         displayFile(list[ii]);
