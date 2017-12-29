@@ -23,18 +23,33 @@ function displayFiles(list)
     }
 }
 
-function getTimeElements(node, type)
+function getTimeElementObjects(node, type)
 {
-    elements = [];
+    elements = []
     $(node).find(type).each( function() {
-        text = '<span class="displayText">' + this.innerHTML + '</span>';
+        thisEl = {text: this.innerHTML, time: -1};
         if ($(node).attr("isTimed") === "true")
         {
-            text += '<span class="displayTimecode"> @' + $(this).attr("time") + '</span>';
+            thisEl.time = $(this).attr("time");
         }
-        elements.push(text);
+        elements.push(thisEl);
     });
     return elements;
+}
+
+function getTimeElements(node, type)
+{
+    elementsTime = [];
+    objects = getTimeElementObjects(node, type);
+    objects.forEach( function(element) {
+        elText = '<span class="displayText">' + element.text + '</span>';
+        if (element.time !== -1)
+        {
+            elText += '<span class="displayTimecode"> @' + element.time + '</span>';
+        }
+        elementsTime.push(elText);
+    });
+    return elementsTime;
 }
 
 function getNoteContents(file)
