@@ -11,45 +11,8 @@ function startSearching(xmlNode)
 function getListOfFiles(xmlNode)
 {
     xmlNode.find("File").each(function() {
-        listOfFiles.push(this);
+        listOfFiles.push(convertFileToJson(this));
     });
-}
-
-function displayFiles(list)
-{
-    for (ii = 0; ii < list.length; ii++)
-    {
-        displayFile(list[ii]);
-    }
-}
-
-function getTimeElementObjects(node, type)
-{
-    elements = []
-    $(node).find(type).each( function() {
-        thisEl = {text: this.innerHTML, time: -1};
-        if ($(node).attr("isTimed") === "true")
-        {
-            thisEl.time = $(this).attr("time");
-        }
-        elements.push(thisEl);
-    });
-    return elements;
-}
-
-function getTimeElements(node, type)
-{
-    elementsTime = [];
-    objects = getTimeElementObjects(node, type);
-    objects.forEach( function(element) {
-        elText = '<span class="displayText">' + element.text + '</span>';
-        if (element.time !== -1)
-        {
-            elText += '<span class="displayTimecode"> @' + element.time + '</span>';
-        }
-        elementsTime.push(elText);
-    });
-    return elementsTime;
 }
 
 function getNoteContents(file)
@@ -66,10 +29,64 @@ function getNoteContents(file)
     return toReturn;
 }
 
+function getTimeElements(node, type)
+{
+    elements = []
+    $(node).find(type).each( function() {
+        thisEl = {text: this.innerHTML, time: -1};
+        if ($(node).attr("isTimed") === "true")
+        {
+            thisEl.time = $(this).attr("time");
+        }
+        elements.push(thisEl);
+    });
+    return elements;
+}
+
+function convertFileToJson(file)
+{
+    jsonFile = {name: $(file).attr("name")};
+    jsonFile.tags = getTimeElements(file, "Tag");
+    jsonFile.quotes = getTimeElements(file, "Quote");
+    jsonFile.notes = getNoteContents(file);
+    return jsonFile;
+}
+
+function getTimeElementsHTML(node, type)
+{
+    elementsTime = [];
+    objects = [];
+    if (type === "Tag")
+    {
+        objects = node.tags;
+    }
+    if (type === "Quote")
+    {
+        objects = node.quotes;
+    }
+    objects.forEach( function(element) {
+        elText = '<span class="displayText">' + element.text + '</span>';
+        if (element.time !== -1)
+        {
+            elText += '<span class="displayTimecode"> @' + element.time + '</span>';
+        }
+        elementsTime.push(elText);
+    });
+    return elementsTime;
+}
+
+function displayFiles(list)
+{
+    for (ii = 0; ii < list.length; ii++)
+    {
+        displayFile(list[ii]);
+    }
+}
+
 function displayFile(file)
 {
     halfTag = $('<div class="displayHalf"></div>');
-    tags = getTimeElements(file, "Tag");
+    tags = getTimeElementsHTML(file, "Tag");
     if (tags.length > 0)
     {
         halfTag.append('<span class="displaySubheader">Tags:</span><br>');
@@ -86,7 +103,7 @@ function displayFile(file)
     }
 
     halfQuote = $('<div class="displayHalf"></div>');
-    quotes = getTimeElements(file, "Quote");
+    quotes = getTimeElementsHTML(file, "Quote");
     if (quotes.length > 0)
     {
         halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
@@ -108,7 +125,7 @@ function displayFile(file)
     halfContainer.append(halfTag);
     halfContainer.append(halfQuote);
     displayNode.append(halfContainer);
-    noteNode = getNoteContents(file);
+    noteNode = file.notes;
     if (noteNode !== "")
     {
         displayNode.append('<br><span class="displaySubheader">Notes:</span><br>');
