@@ -242,7 +242,7 @@ function addTag(isNow)
     time = 0;
     if (isNow)
     {
-        time = $("#preview")[0].currentTime;
+        time = Math.floor($("#preview")[0].currentTime);
     }
     addTimeElement("Tag", isNow, time, "");
 }
@@ -252,7 +252,7 @@ function addQuote(isNow)
     time = 0;
     if (isNow)
     {
-        time = $("#preview")[0].currentTime;
+        time = Math.floor($("#preview")[0].currentTime);
     }
     addTimeElement("Quote", isNow, time, "");
 }
@@ -271,7 +271,7 @@ function deleteTimeElement(node)
 function setToCurrentTime(node)
 {
     currentTime = $("#preview")[0].currentTime;
-    $(node).parent().children('.inputTime')[0].value = currentTime;
+    $(node).parent().children('.inputTime')[0].value = Math.floor(currentTime);
 }
 
 function addTimeElement(segment, isTimed, time, text)
