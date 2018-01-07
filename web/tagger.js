@@ -277,7 +277,8 @@ function setToCurrentTime(node)
 function addTimeElement(segment, isTimed, time, text)
 {
     element = $('<div class="timeElement"></div>');
-    elementText = $('<input class="inputText" type="text" value="' + decodeXmlText(text) + '"></input><br />');  //adding tag text box
+    elementText = $('<input class="inputText" type="text" ></input><br />');  //adding tag text box
+    elementText.val(decodeXmlText(text));
     element.append(elementText);
     elementCheck = '<span class="inputDesc">Is this timed? </span><input class="isTimedCheckbox" type="checkbox" checked="' + isTimed + '"></input>';    //adding checkbox
     element.append(elementCheck);
@@ -296,8 +297,8 @@ function sanitiseXmlText(inText)
 {
     outText = inText + '';
     outText = $('<div/>').text(outText).html();
-    outText = outText.replace('"', "&quot;");
-    outText = outText.replace("'", '&apos;');
+    outText = outText.replace(/"/g, "&quot;");
+    outText = outText.replace(/'/g, '&apos;');
     return outText;
 }
 
