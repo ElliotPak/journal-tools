@@ -87,7 +87,7 @@ function getTimeElements(node, type)
     elements = []
     $(node).find(type).each( function() {
         thisEl = {text: this.innerHTML, time: -1};
-        if ($(node).attr("isTimed") === "true")
+        if ($(this).attr("isTimed") === "true")
         {
             thisEl.time = $(this).attr("time");
         }
