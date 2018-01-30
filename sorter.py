@@ -3,8 +3,8 @@ import os
 import sys
 import re
 import datetime
-import xml.etree.ElementTree as ET
-import xml.dom.minidom
+import json
+import glob
 from shutil import copytree, copyfile, move
 
 args = None     #command line arguments
@@ -206,93 +206,19 @@ def unsortRecurse(path, filesSorted):
                 printStatus(" done!")
             except:
                 printStatus(" failed (file most likely is already in Unsorted)")
-                
     return filesSorted
 
-def loadXmlDoc(filename):
+def loadJsonDoc(filename):
     '''
-    Attempts to load filename as an xml document and returns the root of the
-    document. If it doesn't exist, it creates a new root node and returns that.
+    Attempts to load filename as a JSON document and returns the json object.
+    If it doesn't exist, creates a new one and returns that.
     '''
-    root = None
+    obj = None
     if os.path.exists(thisScriptPath() + "/" + filename):
-        tree = ET.parse(thisScriptPath() + "/" + filename)
-        root = tree.getroot()
+        obj = json.load(open(thisScriptPath() + "/" + filename))
     else:
-        root = ET.Element("Journals")
-    return root
-
-def getTag(xmlDoc, tag, name):
-    '''
-    Searches xmlDoc for a child tag of type tag with a specified name
-    attribute. Returns the result, if it can be found. Otherwise returns None.
-    '''
-    toReturn = None
-    for child in xmlDoc:
-        if child.tag == tag and child.attrib["name"] == name and not toReturn:
-            toReturn = child
-    return toReturn
-
-def getFolderNode(xmlDoc, folder):
-    '''
-    gets a Folder node from xmlDoc, named folder. Creates a new one if it
-    doesn't already exist
-    '''
-    node = getTag(xmlDoc, "Folder", folder)
-    if not node:
-        node = ET.SubElement(xmlDoc, "Folder", name=folder)
-    return node
-
-def addTagChildren(node, files, tagsCompiled):
-    '''
-    for every entry in files, adds a child to node. The child is a "File" tag
-    with a name attribute equal to the entry in "files".
-    '''
-    for f in files:
-        if getTag(node, "File", f) == None:
-            ET.SubElement(node, "File", name=f)
-            tagsCompiled[0].append(f)
-        else:
-            tagsCompiled[1].append(f)
-
-def tagCompileRecurse(xmlDoc, folderPath, folder, tagsCompiled):
-    '''
-    Runs through all files in folderPath/folder adds them to a list, to be
-    added to xmlDoc as children [see addTagChildren()]. Calls itself on all
-    folders it finds in the path. Returns the amount of files added to the
-    tag file.
-    '''
-    fullPath = thisScriptPath() + "/" + folderPath + folder + "/"
-    folderContents = os.listdir(fullPath)
-    files = []
-
-    node = getFolderNode(xmlDoc, folder)
-    for f in folderContents:
-        if os.path.isdir(fullPath + f):
-            tagCompileRecurse(node, folderPath + folder + "/", f, tagsCompiled)
-        else:
-            files.append(f)
-    addTagChildren(node, files, tagsCompiled)
-    return tagsCompiled
-
-def removeAnnoyingLines(elem):
-    hasWords = re.compile("\\w")
-    for element in elem.iter():
-        if not re.search(hasWords,str(element.tail)):
-            element.tail=""
-        if not re.search(hasWords,str(element.text)):
-            element.text = ""
-
-def prettifyXml(element):
-    '''
-    Converts XML to a beautified format. Might take time (requires re-parsing,
-    sadly ;_;)
-    '''
-    removeAnnoyingLines(element)
-    roughString = ET.tostring(element, 'utf-8')
-    reparsed = xml.dom.minidom.parseString(roughString)
-    toReturn = reparsed.toprettyxml(indent="\t")
-    return toReturn
+        obj = []        #because the thing is just a list
+    return obj
 
 def sortDates():
     '''
@@ -372,22 +298,63 @@ def unsort():
         printStatus("\nNo files unsorted.", True, "\n\n")
     return filesSorted
 
+def isFileTagged(jsonDoc, teststr, datetimeInstead):
+    '''
+    Returns true if the specified file exists within jsonDoc. Can either search
+    for filename or datetime value
+    '''
+    isTagged = False
+    for ii in jsonDoc:
+        if datetimeInstead:
+            if ii["datetime"] == teststr:
+                isTagged = True
+        else:
+            if ii["name"] == teststr:
+                isTagged = True
+    return isTagged
+
+def createJsonObj(filename):
+    '''
+    Creates an empty tag entry for the specified file. filename must include
+    path relative to the script
+    '''
+    thisFilename = os.path.basename(filename)
+    thisPath = os.path.dirname(filename)
+    thisObj = {"name": thisFilename, "path": thisPath}
+    thisDatetime = datetimeFromFilename(os.path.splitext(thisFilename)[0])
+    if not thisDatetime == None:
+       thisObj["datetime"] = thisDatetime.strftime("%Y%m%d%H%M")
+    thisObj["tags"] = []
+    thisObj["quotes"] = []
+    thisObj["notes"] = None
+    return thisObj
+
+def compileTagsInFolder(jsonDoc, path, tagsCompiled):
+    '''
+    Checks the specified folder for journal files. If any aren't present in
+    jsonDoc, they're then added.
+    '''
+    for ii in glob.glob(path + "/**", recursive=True):
+        if os.path.isfile(ii) and not isFileTagged(jsonDoc, os.path.basename(ii), datetimeInstead=False):
+            thisObj = createJsonObj(ii)
+            jsonDoc.append(thisObj)
+            tagsCompiled[0].append(ii)
+
 def compileTags():
     '''
-    Ensures that there's an entry in tags.xml for every file in a year folder
+    Ensures that there's an entry in tags.json for every file in a year folder
     '''
     printStatus("=========================", True)
-    printStatus("Making a tags.xml file...", True)
+    printStatus("Making a tags.json file...", True)
     printStatus("=========================", True, "\n\n")
     tagsCompiled = [[], []]
 
-    xmlDoc = loadXmlDoc("tags.xml")
+    jsonDoc = loadJsonDoc("tags.json")
     yearFolders = getYearList(os.listdir(thisScriptPath()))
     for ii in yearFolders:
-        tagCompileRecurse(xmlDoc, "/", ii, tagsCompiled)
-    prettified = prettifyXml(xmlDoc)
-    with open("tags.xml", "w") as f:
-        f.write(prettified)
+        compileTagsInFolder(jsonDoc, "./" + ii, tagsCompiled)
+    with open("tags.json", "w") as f:
+        json.dump(jsonDoc, f)
             
     tagsCompiledAmount = len(tagsCompiled[0])
     if tagsCompiledAmount > 0:
@@ -469,11 +436,14 @@ def printResults(date, time, compile, unsorted, finalCopy):
 
 
 def get_arguments():
+    '''
+    Sets up and retrieves command line arguments, and returns the results
+    '''
     argParser = argparse.ArgumentParser()
-    argParser.add_argument("-t", "--tag", help="Create a tag entry in tags.xml for each sorted file", action="store_true")
+    argParser.add_argument("-a", "--add", help='Moves, renames unsorted files, and adds them to tags', action="store_true")
+    argParser.add_argument("-t", "--tag", help="Create a tag entry in tags.json for every sorted file that doesn't already have one", action="store_true")
     argParser.add_argument("-d", "--date", help="Put unsorted files in date folders based on time in the filename", action="store_true")
-    argParser.add_argument("-r", "--rename", help="Rename files to YYYY.MM.DD HH.MM.DD format", action="store_true")
-    argParser.add_argument("-a", "--all", help='Shorthand for "-c -d -t"', action="store_true")
+    argParser.add_argument("-r", "--rename", help="Rename sorted files to YYYY.MM.DD HH.MM.DD format if they don't conform to that already", action="store_true")
     argParser.add_argument("-m", "--move", help='Move files instead of copying them', action="store_true")
     argParser.add_argument("-n", "--nofiles", help='''Doesn't actually move anything.''', action="store_true")
     argParser.add_argument("-f", "--finalmove", help='''After date sorting, move all files in /Unsorted into /Raw/[current time]. Moves regardless of --move (but won't if --nofiles is present)''', action="store_true")
@@ -499,13 +469,13 @@ if __name__ == "__main__":
     args = get_arguments()
     if args.unsort:
         resultsUnsorted = unsort()
-    if args.date or args.all:
+    if args.date:
         resultsDate = sortDates()
         if args.finalmove:
             resultsFinalMove = finalMove()
-    if args.rename or args.all:
+    if args.rename:
         resultsTime = sortTimes()
-    if args.tag or args.all:
+    if args.tag:
         resultsCompile = compileTags()
 
     if args.summary or args.summarytxt:
