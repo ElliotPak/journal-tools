@@ -2,9 +2,9 @@ searchLoaded = true;
 
 listOfFiles = [];
 
-function startSearching(xmlNode)
+function startSearching(jsonNode)
 {
-    getListOfFiles(xmlNode);
+    listOfFiles = jsonNode;
 }
 
 function getListOfFiles(xmlNode)
@@ -39,9 +39,12 @@ function doesFileMatch(file, settings)
 {
     match = false;
     jj = 0
-    if (file.notes.indexOf(settings.term) !== -1)
+    if (file.notes !== null && typeof file.notes != "undefined")
     {
-        match = true;
+        if (file.notes.indexOf(settings.term) !== -1)
+        {
+            match = true;
+        }
     }
     while (jj < file.tags.length && !match)
     {
@@ -137,6 +140,13 @@ function displayFiles(list)
     }
 }
 
+function formatTime(thisTime)
+{
+    toReturn = thisTime.slice(8,10) + ":" + thisTime.slice(10,12) + ", ";
+    toReturn += thisTime.slice(6,8) + "." + thisTime.slice(4,6) + "." + thisTime.slice(0,4);
+    return toReturn;
+}
+
 function displayFile(file)
 {
     halfTag = $('<div class="displayHalf"></div>');
@@ -175,13 +185,33 @@ function displayFile(file)
 
     displayNode = $('<div class="displayFile"></div>');
     displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span><br>');
+
+    fileSubtitleString = "";
+    if (file.datetime !== null && typeof file.datetime !== "undefined")
+    {
+        fileSubtitleString = formatTime(file.datetime);
+    }
+    if (file.path !== null && typeof file.path !== "undefined")
+    {
+        if (fileSubtitleString !== "")
+        {
+            fileSubtitleString += ", ";
+        }
+        fileSubtitleString += "path: \"" + file.path + "\"";
+    }
+    if (fileSubtitleString !== "")
+    {
+        displayNode.append('<span class="displayTimecode">' + fileSubtitleString + '</span><br />');
+    }
+
     halfContainer = $('<div class="halfContainer"></div>');
     halfContainer.append(halfTag);
     halfContainer.append(halfQuote);
     displayNode.append(halfContainer);
     noteNode = file.notes;
-    if (noteNode !== "")
+    if (noteNode !== "" && noteNode !== null && typeof noteNode !== "undefined")
     {
+        noteNode = noteNode.replace(/\n/g, "<br />");
         displayNode.append('<br><span class="displaySubheader">Notes:</span><br>');
         displayNode.append('<span class="displayText">' + noteNode + '</span>');
     }
