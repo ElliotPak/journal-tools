@@ -1,4 +1,25 @@
 xmlDoc = null;
+jsonDoc = null;
+
+function loadJsonFile()
+{
+    $.ajax({
+        type: "GET",
+        url: "tags.json",
+        dataType: "json",
+        success: function(data) {
+            jsonDoc = data;
+            if (typeof window.taggerLoaded != 'undefined')
+            {
+                startEditing($(data));
+            }
+            if (typeof window.searchLoaded != 'undefined')
+            {
+                startSearching($(data));
+            }
+        }
+    });
+}
 
 function loadXmlFile()
 {
