@@ -157,11 +157,100 @@ function createNoteTextarea(editNode, file)
 	editNode.append(notesBox);
 }
 
+function plusTimeElement(button, atCurrentTime)
+{
+	displayHalf = $(button).parent();
+	if (atCurrentTime)
+	{
+		//will get current time later
+		createTimeElement(displayHalf, "", 0, true);
+	}
+	else
+	{
+		createTimeElement(displayHalf, "", 0, false);
+	}
+}
+
+function createTimeElement(displayHalf, text, time, isTimed)
+{
+	timeElementContainer = displayHalf.find(".timeElementContainer");
+	timeElement = $('<div class="timeElement"></div>');
+	timeElement.append('<a href="#deleteTE" class="textTimeEditSingleChar" onclick="deleteTimeElement(this)">x</a>');
+	timeElement.append('<input class="inputText" value="' + text + '"></input>');
+	timeElement.append('<span class="textTimeEditSingleChar"> @</span>');
+	timeElement.append('<input class="inputTime" value="' + time + '"></input><br />');
+	timeElementContainer.append(timeElement);
+}
+
+function populateTimeElementContainer(displayHalf, file, type)
+{
+	elementList = file.find(".halfContainer > .displayHalf." + type + " > .elementList");
+	elementList.children().each( function() {
+		elementText = $(this).find(".displayText").html();
+		elementTime = $(this).find(".displayTimecode").html();
+		if (typeof elementTime != "undefined")
+		{
+			elementTime = elementTime.replace(/ ?@/, "");
+			createTimeElement(displayHalf, elementText, elementTime, true);
+		}
+		else
+		{
+			createTimeElement(displayHalf, elementText, 0, false);
+		}
+	});
+}
+
+function createTimeElementsArea(editNode, file)
+{
+	halfContainer = $("<div class='halfContainer'></div>");
+	editNode.append(halfContainer);
+	elementType = ["Tag", "Quote"];
+	ii = 0;
+	file.find(".halfContainer").children().each( function () {
+		displayHalf = $('<div class="displayHalf"></div>');
+		halfContainer.append(displayHalf);
+		displayHalf.append('<span class="displaySubheader">' + elementType[ii] + 's:</span>');
+		timeElementContainer = $('<div class="timeElementContainer"></div>');
+		displayHalf.append(timeElementContainer);
+		populateTimeElementContainer(displayHalf, file, elementType[ii]);
+		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElement(this, false)">+' + elementType[ii] + '</a>');
+		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElement(this, true)">+' + elementType[ii] + ' at current time</a>');
+		ii++;
+	});
+}
+
 function saveNoteTextarea(editNode, file)
 {
 	newNoteText = editNode.find(".notesBox").val();
 	newNoteText = newNoteText.replace(/\n/g, "<br>");
 	file.find(".noteContainer > .displayText").html(newNoteText);
+}
+
+function saveTimeElementsArea(editNode, file)
+{
+	displayHalfSelector = file.find("> .halfContainer > .displayHalf")
+	displayHalfSelector.find("> ul > li").remove();
+	elementType = ["Tag", "Quote"];
+	ii = 0;
+	editNode.find(".halfContainer").children().each( function() {
+		thisList = $(displayHalfSelector[ii]).find("> ul");
+		console.log(thisList);
+		$(this).find(".timeElementContainer > .timeElement").each( function() {
+			displayNewTimeElement(thisList, $(this));
+		});
+
+		ii++;
+	});
+}
+
+function displayNewTimeElement(thisList, element)
+{
+	newElement = $("<li></li>");
+	elementText = element.find(".inputText").val();
+	elementTime = element.find(".inputTime").val();
+	newElement.append('<span class="displayText">' + elementText + '</span>');
+	newElement.append('<span class="displayTimecode"> @' + elementTime + '</span>');
+	thisList.append(newElement);
 }
 
 function editFile(button)
@@ -174,6 +263,7 @@ function editFile(button)
 	saveChangesButton = $('<button class="exitEditButton" onclick="saveFileChanges(this)">Save changes</button>');
 	saveChangesButton.insertBefore(file.find(".editButton")[0]);
 	editNode.insertBefore(file.find(".preview")[0]);
+	createTimeElementsArea(editNode, file);
 	createNoteTextarea(editNode, file);
 }
 
@@ -182,6 +272,7 @@ function saveFileChanges(button)
 	file = $(button.parentElement);
 	editNode = file.find(".editFile");
 	saveNoteTextarea(editNode, file);
+	saveTimeElementsArea(editNode, file);
 	editNode.remove();
 	file.find(".exitEditButton").remove();
 	file.find(".editButton").show();
@@ -191,12 +282,12 @@ function saveFileChanges(button)
 
 function displayFile(file)
 {
-    halfTag = $('<div class="displayHalf"></div>');
+    halfTag = $('<div class="displayHalf Tag"></div>');
     tags = getTimeElementsHTML(file, "Tag");
     if (tags.length > 0)
     {
         halfTag.append('<span class="displaySubheader">Tags:</span><br>');
-        tagList = $('<ul class="tagList"></ul>');
+        tagList = $('<ul class="elementList"></ul>');
         halfTag.append(tagList);
         tags.forEach( function(entry) {
             tagEntry = $("<li>" + entry + "</li>")
@@ -208,12 +299,12 @@ function displayFile(file)
         halfTag.append('<span class="displaySubheader">No tags.</span><br>');
     }
 
-    halfQuote = $('<div class="displayHalf"></div>');
+    halfQuote = $('<div class="displayHalf Quote"></div>');
     quotes = getTimeElementsHTML(file, "Quote");
     if (quotes.length > 0)
     {
         halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
-        quoteList = $('<ul class="quoteList"></ul>');
+        quoteList = $('<ul class="elementList"></ul>');
         halfQuote.append(quoteList);
         quotes.forEach( function(entry) {
             quoteEntry = $("<li>" + entry + "</li>")

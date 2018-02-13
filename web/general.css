@@ -95,6 +95,7 @@ li {
     float:left;
     margin-left: 10px;
 }
+
 #buttonSave {
     visibility:hidden;
     float:right;
@@ -153,16 +154,20 @@ li {
     height: 65%;
 }
 
+.timeElementContainer {
+	padding-bottom: 5px;
+}
+
 .timeElement {
-    padding-top: 30px;
+    padding: 5px 0;
 }
 
 .inputText {
-    width: 90%;
+    width: 75%;
 }
 
 .inputTime {
-    width: 10%;
+    width: 7.5%;
 }
 
 .inputDesc{
@@ -215,6 +220,18 @@ li {
     font-size: 16px;
     color: #444;
     font-style: italic;
+}
+
+.textTimeEdit {
+	font-size: 12px;
+	color: #444;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.textTimeEditSingleChar {
+	font-size: 20px;
+	color: #444;
 }
 
 .editButton {
