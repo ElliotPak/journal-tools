@@ -77,10 +77,9 @@ li {
     overflow-y: scroll;
 }
 
-#notesBox {
-    height: 80%;
-    width: 80%;
-    margin: 5% solid transparent;
+.notesBox {
+    width: 100%;
+	height: 100%;
 }
 
 #segmentTag {
@@ -149,8 +148,8 @@ li {
 }
 
 .preview {
-    margin: 10px;
-    width: calc(95% - 20px);
+    margin: 30px 0 0;
+    width: 100%;
     height: 65%;
 }
 
@@ -217,3 +216,10 @@ li {
     color: #444;
     font-style: italic;
 }
+
+.editButton {
+	float: right;
+}
+
+.exitEditButton {
+	float: right;

@@ -147,6 +147,48 @@ function formatTime(thisTime)
     return toReturn;
 }
 
+function createNoteTextarea(editNode, file)
+{
+	editNode.append('<span class="displaySubheader">Notes:</span><br />');
+	notesBox = $('<textarea rows="6" class="notesBox"></textarea>');
+	noteText = file.find(".noteContainer > .displayText").html();
+	noteText = noteText.replace(/<br( \/)?>/g, "\n");
+	notesBox.val(noteText);
+	editNode.append(notesBox);
+}
+
+function saveNoteTextarea(editNode, file)
+{
+	newNoteText = editNode.find(".notesBox").val();
+	newNoteText = newNoteText.replace(/\n/g, "<br>");
+	file.find(".noteContainer > .displayText").html(newNoteText);
+}
+
+function editFile(button)
+{
+	file = $(button.parentElement);
+	file.find(".editButton").hide();
+	file.find(".halfContainer").hide();
+	file.find(".noteContainer").hide();
+	editNode = $('<div class="editFile"></div>');
+	saveChangesButton = $('<button class="exitEditButton" onclick="saveFileChanges(this)">Save changes</button>');
+	saveChangesButton.insertBefore(file.find(".editButton")[0]);
+	editNode.insertBefore(file.find(".preview")[0]);
+	createNoteTextarea(editNode, file);
+}
+
+function saveFileChanges(button)
+{
+	file = $(button.parentElement);
+	editNode = file.find(".editFile");
+	saveNoteTextarea(editNode, file);
+	editNode.remove();
+	file.find(".exitEditButton").remove();
+	file.find(".editButton").show();
+	file.find(".halfContainer").show();
+	file.find(".noteContainer").show();
+}
+
 function displayFile(file)
 {
     halfTag = $('<div class="displayHalf"></div>');
@@ -184,7 +226,8 @@ function displayFile(file)
     }
 
     displayNode = $('<div class="displayFile"></div>');
-    displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span><br>');
+    displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
+	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
 
     fileSubtitleString = "";
     if (file.datetime !== null && typeof file.datetime !== "undefined")
@@ -208,17 +251,24 @@ function displayFile(file)
     halfContainer.append(halfTag);
     halfContainer.append(halfQuote);
     displayNode.append(halfContainer);
+
+	noteContainer = $('<div class="noteContainer"></div>');
     noteNode = file.notes;
     if (noteNode !== "" && noteNode !== null && typeof noteNode !== "undefined")
     {
         noteNode = noteNode.replace(/\n/g, "<br />");
-        displayNode.append('<br><span class="displaySubheader">Notes:</span><br>');
-        displayNode.append('<span class="displayText">' + noteNode + '</span>');
+        noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
+        noteContainer.append('<span class="displayText">' + noteNode + '</span>');
     }
     else
     {
-        displayNode.append('<br><span class="displaySubheader">No notes.</span>')
+        noteContainer.append('<br><span class="displaySubheader">No notes.</span>')
     }
+	displayNode.append(noteContainer);
+
+	preview = createPreview(file.path, file.name);
+	displayNode.append(preview);
+	
     $("#results").append(displayNode);
     $("#results").append("<br>");
 }
