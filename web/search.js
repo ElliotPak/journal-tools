@@ -152,8 +152,11 @@ function createNoteTextarea(editNode, file)
 	editNode.append('<span class="displaySubheader">Notes:</span><br />');
 	notesBox = $('<textarea rows="6" class="notesBox"></textarea>');
 	noteText = file.find(".noteContainer > .displayText").html();
-	noteText = noteText.replace(/<br( \/)?>/g, "\n");
-	notesBox.val(noteText);
+	if (typeof noteText !== "undefined")
+	{
+		noteText = noteText.replace(/<br( \/)?>/g, "\n");
+		notesBox.val(noteText);
+	}
 	editNode.append(notesBox);
 }
 
