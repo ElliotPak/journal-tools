@@ -353,15 +353,11 @@ function displayFile(file)
 	fileSubtitleString = "";
 	if (file.datetime !== null && typeof file.datetime !== "undefined")
 	{
-		fileSubtitleString = formatTime(file.datetime);
+		fileSubtitleString += formatTime(file.datetime) + "<br />";
 	}
 	if (file.path !== null && typeof file.path !== "undefined")
 	{
-		if (fileSubtitleString !== "")
-		{
-			fileSubtitleString += ", ";
-		}
-		fileSubtitleString += "path: \"" + file.path + "\"";
+		fileSubtitleString += "Path: " + file.path + "";
 	}
 	if (fileSubtitleString !== "")
 	{
