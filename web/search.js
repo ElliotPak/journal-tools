@@ -4,7 +4,7 @@ listOfFiles = [];
 
 function startSearching(jsonNode)
 {
-    listOfFiles = jsonNode;
+	listOfFiles = jsonNode;
 }
 
 /**
@@ -13,10 +13,10 @@ function startSearching(jsonNode)
  */
 function performSearch(button)
 {
-    $("#results").empty();
-    input = $(button).parent().find("input");
-    settings = {term : input[0].value, searchtype: "tfnp"};
-    list = searchFiles(listOfFiles, settings);
+	$("#results").empty();
+	input = $(button).parent().find("input");
+	settings = {term : input[0].value, searchtype: "tfnp"};
+	list = searchFiles(listOfFiles, settings);
 }
 
 /**
@@ -24,15 +24,15 @@ function performSearch(button)
  */
 function searchFiles(fileList, settings)
 {
-    resultList = [];
-    for (ii = 0; ii < fileList.length; ii++)
-    {
-        if (doesFileMatch(fileList[ii], settings))
-        {
-            resultList.push(fileList[ii]);
-        }
-    }
-    return resultList;
+	resultList = [];
+	for (ii = 0; ii < fileList.length; ii++)
+	{
+		if (doesFileMatch(fileList[ii], settings))
+		{
+			resultList.push(fileList[ii]);
+		}
+	}
+	return resultList;
 }
 
 /**
@@ -40,39 +40,39 @@ function searchFiles(fileList, settings)
  */
 function doesFileMatch(file, settings)
 {
-    match = false;
-    jj = 0
-    if (file.notes !== null && typeof file.notes != "undefined")
-    {
-        if (file.notes.indexOf(settings.term) !== -1)
-        {
-            match = true;
-        }
-    }
-    while (jj < file.tags.length && !match)
-    {
-        tagText = file.tags[jj].text;
-        if (tagText.indexOf(settings.term) !== -1)
-        {
-            match = true;
-        }
-        jj++;
-    }
-    jj = 0;
-    while (jj < file.quotes.length && !match)
-    {
-        tagText = file.quotes[jj].text;
-        if (tagText.indexOf(settings.term) !== -1)
-        {
-            match = true;
-        }
-        jj++;
-    }
-    if (match === true)
-    {
-        displayFile(file);
-    }
-    return match;
+	match = false;
+	jj = 0
+	if (file.notes !== null && typeof file.notes != "undefined")
+	{
+		if (file.notes.indexOf(settings.term) !== -1)
+		{
+			match = true;
+		}
+	}
+	while (jj < file.tags.length && !match)
+	{
+		tagText = file.tags[jj].text;
+		if (tagText.indexOf(settings.term) !== -1)
+		{
+			match = true;
+		}
+		jj++;
+	}
+	jj = 0;
+	while (jj < file.quotes.length && !match)
+	{
+		tagText = file.quotes[jj].text;
+		if (tagText.indexOf(settings.term) !== -1)
+		{
+			match = true;
+		}
+		jj++;
+	}
+	if (match === true)
+	{
+		displayFile(file);
+	}
+	return match;
 }
 
 /**
@@ -81,25 +81,25 @@ function doesFileMatch(file, settings)
  */
 function getTimeElementsHTML(node, type)
 {
-    elementsTime = [];
-    objects = [];
-    if (type === "Tag")
-    {
-        objects = node.tags;
-    }
-    if (type === "Quote")
-    {
-        objects = node.quotes;
-    }
-    objects.forEach( function(element) {
-        elText = '<span class="displayText">' + element.text + '</span>';
-        if (element.time !== -1)
-        {
-            elText += '<span class="displayTimecode"> @' + element.time + '</span>';
-        }
-        elementsTime.push(elText);
-    });
-    return elementsTime;
+	elementsTime = [];
+	objects = [];
+	if (type === "Tag")
+	{
+		objects = node.tags;
+	}
+	if (type === "Quote")
+	{
+		objects = node.quotes;
+	}
+	objects.forEach( function(element) {
+		elText = '<span class="displayText">' + element.text + '</span>';
+		if (element.time !== -1)
+		{
+			elText += '<span class="displayTimecode"> @' + element.time + '</span>';
+		}
+		elementsTime.push(elText);
+	});
+	return elementsTime;
 }
 
 /**
@@ -107,11 +107,11 @@ function getTimeElementsHTML(node, type)
  */
 function displayFiles(list)
 {
-    $("#results").empty();
-    for (ii = 0; ii < list.length; ii++)
-    {
-        displayFile(list[ii]);
-    }
+	$("#results").empty();
+	for (ii = 0; ii < list.length; ii++)
+	{
+		displayFile(list[ii]);
+	}
 }
 
 /**
@@ -119,9 +119,9 @@ function displayFiles(list)
  */
 function formatTime(thisTime)
 {
-    toReturn = thisTime.slice(8,10) + ":" + thisTime.slice(10,12) + ", ";
-    toReturn += thisTime.slice(6,8) + "." + thisTime.slice(4,6) + "." + thisTime.slice(0,4);
-    return toReturn;
+	toReturn = thisTime.slice(8,10) + ":" + thisTime.slice(10,12) + ", ";
+	toReturn += thisTime.slice(6,8) + "." + thisTime.slice(4,6) + "." + thisTime.slice(0,4);
+	return toReturn;
 }
 
 /**
@@ -312,77 +312,77 @@ function saveFileChanges(button)
  */
 function displayFile(file)
 {
-    halfTag = $('<div class="displayHalf Tag"></div>');
-    tags = getTimeElementsHTML(file, "Tag");
-    if (tags.length > 0)
-    {
-        halfTag.append('<span class="displaySubheader">Tags:</span><br>');
-        tagList = $('<ul class="elementList"></ul>');
-        halfTag.append(tagList);
-        tags.forEach( function(entry) {
-            tagEntry = $("<li>" + entry + "</li>")
-            tagList.append(tagEntry);
-        });
-    }
-    else
-    {
-        halfTag.append('<span class="displaySubheader">No tags.</span><br>');
-    }
-
-    halfQuote = $('<div class="displayHalf Quote"></div>');
-    quotes = getTimeElementsHTML(file, "Quote");
-    if (quotes.length > 0)
-    {
-        halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
-        quoteList = $('<ul class="elementList"></ul>');
-        halfQuote.append(quoteList);
-        quotes.forEach( function(entry) {
-            quoteEntry = $("<li>" + entry + "</li>")
-            quoteList.append(quoteEntry);
-        });
-    }
-    else
-    {
-        halfQuote.append('<span class="displaySubheader">No quotes.</span><br>');
-    }
-
-    displayNode = $('<div class="displayFile"></div>');
-    displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
-	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
-
-    fileSubtitleString = "";
-    if (file.datetime !== null && typeof file.datetime !== "undefined")
-    {
-        fileSubtitleString = formatTime(file.datetime);
-    }
-    if (file.path !== null && typeof file.path !== "undefined")
-    {
-        if (fileSubtitleString !== "")
-        {
-            fileSubtitleString += ", ";
-        }
-        fileSubtitleString += "path: \"" + file.path + "\"";
-    }
-    if (fileSubtitleString !== "")
-    {
-        displayNode.append('<span class="displayTimecode">' + fileSubtitleString + '</span><br />');
-    }
-
-    halfContainer = $('<div class="halfContainer"></div>');
-    halfContainer.append(halfTag);
-    halfContainer.append(halfQuote);
-    displayNode.append(halfContainer);
-
-	noteContainer = $('<div class="noteContainer"></div>');
-    noteText = file.notes;
-    if (noteText !== "" && noteText !== null && typeof noteText !== "undefined")
-    {
-		noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
-        noteText = noteText.replace(/\n/g, "<br />");
-    }
+	halfTag = $('<div class="displayHalf Tag"></div>');
+	tags = getTimeElementsHTML(file, "Tag");
+	if (tags.length > 0)
+	{
+		halfTag.append('<span class="displaySubheader">Tags:</span><br>');
+		tagList = $('<ul class="elementList"></ul>');
+		halfTag.append(tagList);
+		tags.forEach( function(entry) {
+			tagEntry = $("<li>" + entry + "</li>")
+			tagList.append(tagEntry);
+		});
+	}
 	else
 	{
-        noteContainer.append('<br><span class="displaySubheader">No notes.</span><br>')
+		halfTag.append('<span class="displaySubheader">No tags.</span><br>');
+	}
+
+	halfQuote = $('<div class="displayHalf Quote"></div>');
+	quotes = getTimeElementsHTML(file, "Quote");
+	if (quotes.length > 0)
+	{
+		halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
+		quoteList = $('<ul class="elementList"></ul>');
+		halfQuote.append(quoteList);
+		quotes.forEach( function(entry) {
+			quoteEntry = $("<li>" + entry + "</li>")
+			quoteList.append(quoteEntry);
+		});
+	}
+	else
+	{
+		halfQuote.append('<span class="displaySubheader">No quotes.</span><br>');
+	}
+
+	displayNode = $('<div class="displayFile"></div>');
+	displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
+	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
+
+	fileSubtitleString = "";
+	if (file.datetime !== null && typeof file.datetime !== "undefined")
+	{
+		fileSubtitleString = formatTime(file.datetime);
+	}
+	if (file.path !== null && typeof file.path !== "undefined")
+	{
+		if (fileSubtitleString !== "")
+		{
+			fileSubtitleString += ", ";
+		}
+		fileSubtitleString += "path: \"" + file.path + "\"";
+	}
+	if (fileSubtitleString !== "")
+	{
+		displayNode.append('<span class="displayTimecode">' + fileSubtitleString + '</span><br />');
+	}
+
+	halfContainer = $('<div class="halfContainer"></div>');
+	halfContainer.append(halfTag);
+	halfContainer.append(halfQuote);
+	displayNode.append(halfContainer);
+
+	noteContainer = $('<div class="noteContainer"></div>');
+	noteText = file.notes;
+	if (noteText !== "" && noteText !== null && typeof noteText !== "undefined")
+	{
+		noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
+		noteText = noteText.replace(/\n/g, "<br />");
+	}
+	else
+	{
+		noteContainer.append('<br><span class="displaySubheader">No notes.</span><br>')
 		noteText = "";
 	}
 	noteContainer.append('<span class="displayText">' + noteText + '</span>');
@@ -391,6 +391,6 @@ function displayFile(file)
 	preview = createPreview(file.path, file.name);
 	displayNode.append(preview);
 	
-    $("#results").append(displayNode);
-    $("#results").append("<br>");
+	$("#results").append(displayNode);
+	$("#results").append("<br>");
 }
