@@ -361,17 +361,18 @@ function displayFile(file)
     displayNode.append(halfContainer);
 
 	noteContainer = $('<div class="noteContainer"></div>');
-    noteNode = file.notes;
-    if (noteNode !== "" && noteNode !== null && typeof noteNode !== "undefined")
+    noteText = file.notes;
+    if (noteText !== "" && noteText !== null && typeof noteText !== "undefined")
     {
-        noteNode = noteNode.replace(/\n/g, "<br />");
-        noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
-        noteContainer.append('<span class="displayText">' + noteNode + '</span>');
+		noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
+        noteText = noteText.replace(/\n/g, "<br />");
     }
-    else
-    {
-        noteContainer.append('<br><span class="displaySubheader">No notes.</span>')
-    }
+	else
+	{
+        noteContainer.append('<br><span class="displaySubheader">No notes.</span><br>')
+		noteText = "";
+	}
+	noteContainer.append('<span class="displayText">' + noteText + '</span>');
 	displayNode.append(noteContainer);
 
 	preview = createPreview(file.path, file.name);
