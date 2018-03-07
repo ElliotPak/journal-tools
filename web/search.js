@@ -223,7 +223,20 @@ function saveNoteTextarea(editNode, file)
 {
 	newNoteText = editNode.find(".notesBox").val();
 	newNoteText = newNoteText.replace(/\n/g, "<br>");
-	file.find(".noteContainer > .displayText").html(newNoteText);
+	noteDisplaySelector = file.find(".noteContainer > .displayText");
+	
+	if (noteDisplaySelector.length != 0)
+	{
+		noteDisplaySelector.html(newNoteText);
+	}
+	if (newNoteText != "")
+	{
+		file.find(".noteContainer > .displaySubheader").html("Notes:");
+	}
+	else
+	{
+		file.find(".noteContainer > .displaySubheader").html("No notes.");
+	}
 }
 
 /**
