@@ -4,7 +4,17 @@ listOfFiles = [];
 
 function startSearching(jsonNode)
 {
+	console.log(jsonNode);
 	listOfFiles = jsonNode;
+	$("#buttonSave").css("visibility", "visible");
+}
+
+/**
+ * saves the tags as json fille
+ */
+function saveJsonFile()
+{
+	saveFile(listOfFiles);
 }
 
 /**

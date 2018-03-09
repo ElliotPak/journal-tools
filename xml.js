@@ -41,11 +41,13 @@ function loadXmlFile()
     });
 }
 
-function saveFile()
+function saveFile(jsonfile)
 {
-    xmlString = new XMLSerializer().serializeToString(xmlDoc);
-    var blob=new Blob([xmlString],{type:'text/xml;charset=utf-8'});
-    saveAs(blob,'tags.xml');
+    jsonString = JSON.stringify(jsonfile);
+	console.log(jsonfile);
+	console.log(jsonString);
+    var blob=new Blob([jsonString],{type:'application/json;charset=utf-8'});
+    saveAs(blob,'tags.json');
 }
 
 function createPreview(path, filename)
