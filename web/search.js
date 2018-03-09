@@ -160,6 +160,14 @@ function plusTimeElementClick(button, atCurrentTime)
 }
 
 /**
+ * deletes the time element that this button belongs to
+ */
+function deleteTimeElement(button)
+{
+	$(button).parent().remove();
+}
+
+/**
  * Creates the div for a time element and appends it to its container
  */
 function createTimeElementDiv(displayHalf, text, time, isTimed)
