@@ -302,22 +302,27 @@ function editFile(button)
 	file.find(".halfContainer").hide();
 	file.find(".noteContainer").hide();
 	editNode = $('<div class="editFile"></div>');
-	saveChangesButton = $('<button class="exitEditButton" onclick="saveFileChanges(this)">Save changes</button>');
+	saveChangesButton = $('<button class="exitEditButton" onclick="goBackToFilePreview(this, true)">Save changes</button>');
 	saveChangesButton.insertBefore(file.find(".editButton")[0]);
+	discardChangesButton = $('<button class="exitEditButton" onclick="goBackToFilePreview(this, false)">Discard changes</button>');
+	discardChangesButton.insertBefore(saveChangesButton);
 	editNode.insertBefore(file.find(".preview")[0]);
 	createTimeElementsArea(editNode, file);
 	createNoteTextarea(editNode, file);
 }
 
 /**
- * save contents of editing elements, destroy them, and show display ones.
+ * destroy contents of editing elements and show display ones. optionally save
  */
-function saveFileChanges(button)
+function goBackToFilePreview(button, saveChanges)
 {
 	file = $(button.parentElement);
 	editNode = file.find(".editFile");
-	saveNoteTextarea(editNode, file);
-	saveTimeElementsArea(editNode, file);
+	if (saveChanges)
+	{
+		saveNoteTextarea(editNode, file);
+		saveTimeElementsArea(editNode, file);
+	}
 	editNode.remove();
 	file.find(".exitEditButton").remove();
 	file.find(".editButton").show();
