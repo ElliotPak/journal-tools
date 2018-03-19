@@ -11,7 +11,7 @@ function startSearching(jsonNode)
 
 /**
  * saves the tags as json fille
- */
+ **/
 function saveJsonFile()
 {
 	saveFile(listOfFiles);
@@ -20,7 +20,7 @@ function saveJsonFile()
 /**
  * Calls searchFiles with value of search text
  * Will eventually be fleshed out
- */
+ **/
 function performSearch(button)
 {
 	$("#results").empty();
@@ -31,7 +31,7 @@ function performSearch(button)
 
 /**
  * Returns a list of files that match the specified search terms
- */
+ **/
 function searchFiles(fileList, settings)
 {
 	resultList = [];
@@ -47,7 +47,7 @@ function searchFiles(fileList, settings)
 
 /**
  * Checks if the file matches the specified search terms
- */
+ **/
 function doesFileMatch(file, settings)
 {
 	match = false;
@@ -88,7 +88,7 @@ function doesFileMatch(file, settings)
 /**
  * Creates spans for all time elements of each time element type for the 
  * specified file.
- */
+ **/
 function getTimeElementsHTML(node, type)
 {
 	elementsTime = [];
@@ -114,7 +114,7 @@ function getTimeElementsHTML(node, type)
 
 /**
  * displays all files in a list
- */
+ **/
 function displayFiles(list)
 {
 	$("#results").empty();
@@ -126,7 +126,7 @@ function displayFiles(list)
 
 /**
  * Formats file time into a human readable string
- */
+ **/
 function formatTime(thisTime)
 {
 	toReturn = thisTime.slice(8,10) + ":" + thisTime.slice(10,12) + ", ";
@@ -137,7 +137,7 @@ function formatTime(thisTime)
 /**
  * Creates text area for notes for the specified file and appends it to the
  * note's div
- */
+ **/
 function createNoteTextarea(editNode, file)
 {
 	editNode.append('<span class="displaySubheader">Notes:</span><br />');
@@ -154,7 +154,7 @@ function createNoteTextarea(editNode, file)
 /**
  * Called when clicking a +timeelement button. creates the specified time
  * time element div
- */
+ **/
 function plusTimeElementClick(button, atCurrentTime)
 {
 	displayHalf = $(button).parent();
@@ -171,15 +171,15 @@ function plusTimeElementClick(button, atCurrentTime)
 
 /**
  * deletes the time element that this button belongs to
- */
+ **/
 function deleteTimeElement(button)
 {
 	$(button).parent().remove();
 }
 
 /**
- * Creates the div for a time element and appends it to its container
- */
+ * Creates the div for an editable time element and appends it to its container
+ **/
 function createTimeElementDiv(displayHalf, text, time, isTimed)
 {
 	timeElementContainer = displayHalf.find(".timeElementContainer");
@@ -193,7 +193,7 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 
 /**
  * Converts all spans of time elements into editable time elements
- */
+ **/
 function populateTimeElementContainer(displayHalf, file, type)
 {
 	elementList = file.find(".halfContainer > .displayHalf." + type + " > .elementList");
@@ -214,7 +214,7 @@ function populateTimeElementContainer(displayHalf, file, type)
 
 /**
  * Creates the container for editable time elements
- */
+ **/
 function createTimeElementsArea(editNode, file)
 {
 	halfContainer = $("<div class='halfContainer'></div>");
@@ -260,7 +260,7 @@ function saveNoteTextarea(editNode, file)
 /**
  * Changes display text for a file's time elements to the value in the editable
  * ones
- */
+ **/
 function saveTimeElementsArea(editNode, file)
 {
 	displayHalfSelector = file.find("> .halfContainer > .displayHalf")
@@ -280,7 +280,7 @@ function saveTimeElementsArea(editNode, file)
 
 /**
  * Creates a new span for a time element
- */
+ **/
 function displayNewTimeElement(thisList, element)
 {
 	newElement = $("<li></li>");
@@ -294,7 +294,7 @@ function displayNewTimeElement(thisList, element)
 /**
  * swap display file to editing mode: create editing elements and hide display
  * ones.
- */
+ **/
 function editFile(button)
 {
 	file = $(button.parentElement);
@@ -312,15 +312,49 @@ function editFile(button)
 }
 
 /**
+ * return a json representation of the edited file
+ **/
+function getNewFileJson(editNode)
+{
+	newFile = {};
+	newFile.name = editNode.parent().find(".displayFilename").html();
+	newFilePathStr = editNode.parent().find(".displayTimecode.path").html();
+	newFile.path = newFilePathStr.replace(/Path: ?/g, "");
+
+	newFile.notes = editNode.find(".notesBox").val();
+	return newFile;
+}
+
+/**
+ * replaces specified file in listOfFiles
+ **/
+
+function replaceFileInList(file)
+{
+	for (var ii = 0; ii < listOfFiles.length; ii++)
+	{
+		iterFile = listOfFiles[ii];
+		console.log(iterFile)
+		console.log(file)
+		if (file.path === iterFile.path && file.name === iterFile.name)
+		{
+			listOfFiles[ii] = file;
+		}
+	}
+}
+
+/**
  * destroy contents of editing elements and show display ones. optionally save
- */
+ **/
 function goBackToFilePreview(button, saveChanges)
 {
 	file = $(button.parentElement);
 	editNode = file.find(".editFile");
 	if (saveChanges)
 	{
-		saveNoteTextarea(editNode, file);
+		newFileJson = getNewFileJson(editNode);
+		replaceFileInList(newFileJson);
+		saveNoteTextarea(newFileJson, file);
 		saveTimeElementsArea(editNode, file);
 	}
 	editNode.remove();
@@ -332,7 +366,7 @@ function goBackToFilePreview(button, saveChanges)
 
 /**
  * Create a div to display a file from its JSON representation
- */
+ **/
 function displayFile(file)
 {
 	halfTag = $('<div class="displayHalf Tag"></div>');
