@@ -236,11 +236,10 @@ function createTimeElementsArea(editNode, file)
 
 /**
  * Changes display text for a file's notes to the value in the note textarea
- */
-function saveNoteTextarea(editNode, file)
+ **/
+function saveNoteTextarea(newFileJson, file)
 {
-	newNoteText = editNode.find(".notesBox").val();
-	newNoteText = newNoteText.replace(/\n/g, "<br>");
+	newNoteText = newFileJson.notes;
 	noteDisplaySelector = file.find(".noteContainer > .displayText");
 	
 	if (noteDisplaySelector.length != 0)
@@ -269,7 +268,6 @@ function saveTimeElementsArea(editNode, file)
 	ii = 0;
 	editNode.find(".halfContainer").children().each( function() {
 		thisList = $(displayHalfSelector[ii]).find("> ul");
-		console.log(thisList);
 		$(this).find(".timeElementContainer > .timeElement").each( function() {
 			displayNewTimeElement(thisList, $(this));
 		});
@@ -407,18 +405,13 @@ function displayFile(file)
 	displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
 	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
 
-	fileSubtitleString = "";
 	if (file.datetime !== null && typeof file.datetime !== "undefined")
 	{
-		fileSubtitleString += formatTime(file.datetime) + "<br />";
+		displayNode.append('<span class="displayTimecode time">' + formatTime(file.datetime) + "</span><br />")
 	}
 	if (file.path !== null && typeof file.path !== "undefined")
 	{
-		fileSubtitleString += "Path: " + file.path + "";
-	}
-	if (fileSubtitleString !== "")
-	{
-		displayNode.append('<span class="displayTimecode">' + fileSubtitleString + '</span><br />');
+		displayNode.append('<span class="displayTimecode path">Path: ' + file.path + "</span><br />")
 	}
 
 	halfContainer = $('<div class="halfContainer"></div>');
