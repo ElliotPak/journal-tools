@@ -342,8 +342,11 @@ function goBackToFilePreview(button, saveChanges)
 	{
 		newFileJson = getNewFileJson(editNode);
 		replaceFileInList(newFileJson);
-		saveNoteTextarea(newFileJson, file);
-		saveTimeElementsArea(newFileJson, file);
+		file.find(".halfContainer").remove();
+		createFileDisplayTimeElements(file, newFileJson);
+		file.find(".noteContainer").remove();
+		createFileDisplayNotes(file, newFileJson);
+		file.append(file.find(".preview")[0]);
 	}
 	editNode.remove();
 	file.find(".exitEditButton").remove();
