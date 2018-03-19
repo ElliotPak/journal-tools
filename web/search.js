@@ -262,18 +262,6 @@ function saveNoteTextarea(newFileJson, file)
  **/
 function saveTimeElementsArea(editNode, file)
 {
-	displayHalfSelector = file.find("> .halfContainer > .displayHalf")
-	displayHalfSelector.find("> ul > li").remove();
-	elementType = ["Tag", "Quote"];
-	ii = 0;
-	editNode.find(".halfContainer").children().each( function() {
-		thisList = $(displayHalfSelector[ii]).find("> ul");
-		$(this).find(".timeElementContainer > .timeElement").each( function() {
-			displayNewTimeElement(thisList, $(this));
-		});
-
-		ii++;
-	});
 }
 
 /**
@@ -318,9 +306,25 @@ function getNewFileJson(editNode)
 	newFile.name = editNode.parent().find(".displayFilename").html();
 	newFilePathStr = editNode.parent().find(".displayTimecode.path").html();
 	newFile.path = newFilePathStr.replace(/Path: ?/g, "");
-
 	newFile.notes = editNode.find(".notesBox").val();
+	displayHalfList = editNode.find(".halfContainer").children();
+	newFile.tags = getNewFileTimeElements(displayHalfList[0])
+	newFile.quotes = getNewFileTimeElements(displayHalfList[1])
+	console.log(newFile);
 	return newFile;
+}
+
+function getNewFileTimeElements(displayHalf)
+{
+	toReturn = [];
+	$(displayHalf).find(".timeElementContainer > .timeElement").each( function() {
+		console.log(this);
+		timeElement = {text: $(this).find(".inputText").val()};
+		timeElement.time = $(this).find(".inputTime").val();
+		timeElement.isTimed = false;
+		toReturn.push(timeElement);
+	});
+	return toReturn;
 }
 
 /**
@@ -332,8 +336,6 @@ function replaceFileInList(file)
 	for (var ii = 0; ii < listOfFiles.length; ii++)
 	{
 		iterFile = listOfFiles[ii];
-		console.log(iterFile)
-		console.log(file)
 		if (file.path === iterFile.path && file.name === iterFile.name)
 		{
 			listOfFiles[ii] = file;
