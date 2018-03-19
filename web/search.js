@@ -4,7 +4,6 @@ listOfFiles = [];
 
 function startSearching(jsonNode)
 {
-	console.log(jsonNode);
 	listOfFiles = jsonNode;
 	$("#buttonSave").css("visibility", "visible");
 }
@@ -310,15 +309,16 @@ function getNewFileJson(editNode)
 	displayHalfList = editNode.find(".halfContainer").children();
 	newFile.tags = getNewFileTimeElements(displayHalfList[0])
 	newFile.quotes = getNewFileTimeElements(displayHalfList[1])
-	console.log(newFile);
 	return newFile;
 }
 
+/**
+ * turns editable time elements into list of json representation
+ **/
 function getNewFileTimeElements(displayHalf)
 {
 	toReturn = [];
 	$(displayHalf).find(".timeElementContainer > .timeElement").each( function() {
-		console.log(this);
 		timeElement = {text: $(this).find(".inputText").val()};
 		timeElement.time = $(this).find(".inputTime").val();
 		timeElement.isTimed = false;
