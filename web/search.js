@@ -79,7 +79,7 @@ function doesFileMatch(file, settings)
 	}
 	if (match === true)
 	{
-		displayFile(file);
+		createFileDisplay(file);
 	}
 	return match;
 }
@@ -109,18 +109,6 @@ function getTimeElementsHTML(node, type)
 		elementsTime.push(elText);
 	});
 	return elementsTime;
-}
-
-/**
- * displays all files in a list
- **/
-function displayFiles(list)
-{
-	$("#results").empty();
-	for (ii = 0; ii < list.length; ii++)
-	{
-		displayFile(list[ii]);
-	}
 }
 
 /**
@@ -355,7 +343,7 @@ function goBackToFilePreview(button, saveChanges)
 		newFileJson = getNewFileJson(editNode);
 		replaceFileInList(newFileJson);
 		saveNoteTextarea(newFileJson, file);
-		saveTimeElementsArea(editNode, file);
+		saveTimeElementsArea(newFileJson, file);
 	}
 	editNode.remove();
 	file.find(".exitEditButton").remove();
@@ -365,10 +353,48 @@ function goBackToFilePreview(button, saveChanges)
 }
 
 /**
- * Create a div to display a file from its JSON representation
+ * 
  **/
-function displayFile(file)
+function createFileDisplayBase(file)
 {
+	displayNode = $('<div class="displayFile"></div>');
+	displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
+	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
+
+	if (file.datetime !== null && typeof file.datetime !== "undefined")
+	{
+		displayNode.append('<span class="displayTimecode time">' + formatTime(file.datetime) + "</span><br />")
+	}
+	if (file.path !== null && typeof file.path !== "undefined")
+	{
+		displayNode.append('<span class="displayTimecode path">Path: ' + file.path + "</span><br />")
+	}
+	return displayNode;
+}
+
+function createFileDisplayNotes(displayNode, file)
+{
+	noteContainer = $('<div class="noteContainer"></div>');
+	noteText = file.notes;
+	if (noteText !== "" && noteText !== null && typeof noteText !== "undefined")
+	{
+		noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
+		noteText = noteText.replace(/\n/g, "<br />");
+	}
+	else
+	{
+		noteContainer.append('<br><span class="displaySubheader">No notes.</span><br>')
+		noteText = "";
+	}
+	noteContainer.append('<span class="displayText">' + noteText + '</span>');
+	displayNode.append(noteContainer);
+}
+
+function createFileDisplayTimeElements(displayNode, file)
+{
+	halfContainer = $('<div class="halfContainer"></div>');
+	displayNode.append(halfContainer);
+
 	halfTag = $('<div class="displayHalf Tag"></div>');
 	tags = getTimeElementsHTML(file, "Tag");
 	if (tags.length > 0)
@@ -385,6 +411,7 @@ function displayFile(file)
 	{
 		halfTag.append('<span class="displaySubheader">No tags.</span><br>');
 	}
+	halfContainer.append(halfTag);
 
 	halfQuote = $('<div class="displayHalf Quote"></div>');
 	quotes = getTimeElementsHTML(file, "Quote");
@@ -402,43 +429,21 @@ function displayFile(file)
 	{
 		halfQuote.append('<span class="displaySubheader">No quotes.</span><br>');
 	}
-
-	displayNode = $('<div class="displayFile"></div>');
-	displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
-	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
-
-	if (file.datetime !== null && typeof file.datetime !== "undefined")
-	{
-		displayNode.append('<span class="displayTimecode time">' + formatTime(file.datetime) + "</span><br />")
-	}
-	if (file.path !== null && typeof file.path !== "undefined")
-	{
-		displayNode.append('<span class="displayTimecode path">Path: ' + file.path + "</span><br />")
-	}
-
-	halfContainer = $('<div class="halfContainer"></div>');
-	halfContainer.append(halfTag);
 	halfContainer.append(halfQuote);
-	displayNode.append(halfContainer);
+}
 
-	noteContainer = $('<div class="noteContainer"></div>');
-	noteText = file.notes;
-	if (noteText !== "" && noteText !== null && typeof noteText !== "undefined")
-	{
-		noteContainer.append('<br><span class="displaySubheader">Notes:</span><br>');
-		noteText = noteText.replace(/\n/g, "<br />");
-	}
-	else
-	{
-		noteContainer.append('<br><span class="displaySubheader">No notes.</span><br>')
-		noteText = "";
-	}
-	noteContainer.append('<span class="displayText">' + noteText + '</span>');
-	displayNode.append(noteContainer);
+/**
+ * Create a div to display a file from its JSON representation
+ **/
+function createFileDisplay(file)
+{
+	displayNode = createFileDisplayBase(file);
+	createFileDisplayTimeElements(displayNode, file);
+	createFileDisplayNotes(displayNode, file);
 
 	preview = createPreview(file.path, file.name);
 	displayNode.append(preview);
-	
+
 	$("#results").append(displayNode);
 	$("#results").append("<br>");
 }
