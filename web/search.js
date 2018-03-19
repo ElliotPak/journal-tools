@@ -122,6 +122,21 @@ function formatTime(thisTime)
 }
 
 /**
+ * Parses human readable time string into time string to be used in the file's
+ * JSON representation
+ **/
+function parseTimeString(thisTime)
+{
+	time = thisTime.slice(13, 17);     //year
+	time += thisTime.slice(10, 12);    //month
+	time += thisTime.slice(7, 9);      //day
+	time += thisTime.slice(0, 2);      //hour
+	time += thisTime.slice(3, 5);      //minute
+	console.log(time);
+	return time;
+}
+
+/**
  * Creates text area for notes for the specified file and appends it to the
  * note's div
  **/
@@ -293,6 +308,8 @@ function getNewFileJson(editNode)
 	newFile.name = editNode.parent().find(".displayFilename").html();
 	newFilePathStr = editNode.parent().find(".displayTimecode.path").html();
 	newFile.path = newFilePathStr.replace(/Path: ?/g, "");
+	newFileTimeStr = editNode.parent().find(".displayTimecode.time").html();
+	newFile.time = parseTimeString(newFileTimeStr);
 	newFile.notes = editNode.find(".notesBox").val();
 	displayHalfList = editNode.find(".halfContainer").children();
 	newFile.tags = getNewFileTimeElements(displayHalfList[0])
