@@ -115,7 +115,6 @@ function parseTimeString(thisTime)
 	time += thisTime.slice(7, 9);      //day
 	time += thisTime.slice(0, 2);      //hour
 	time += thisTime.slice(3, 5);      //minute
-	console.log(time);
 	return time;
 }
 
@@ -178,7 +177,6 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 	timeElement.append('<span class="textTimeEditNoclick">Is this timed?</span>');
 	if (isTimed)
 	{
-		console.log(timedCheckbox[0]);
 		timedCheckbox[0].checked = true;
 		toggleTimeSettings(timedCheckbox[0]);
 	}
@@ -206,12 +204,24 @@ function toggleTimeSettings(checkbox)
  **/
 function jumpToTime(button)
 {
+	preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+	if (preview.length > 0)
+	{
+		thisTime = $(button).parent().find(".inputTime")[0].value;
+		preview[0].currentTime = thisTime;
+	}
 }
 
 /**
  **/
 function setToCurrentTime(button)
 {
+	preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+	if (preview.length > 0)
+	{
+		currentTime = Math.floor(preview[0].currentTime);
+		$(button).parent().find(".inputTime")[0].value = currentTime;
+	}
 }
 
 /**

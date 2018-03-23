@@ -69,7 +69,7 @@ function createPreview(path, filename)
     }
     if (previewText != "")
     {
-        previewText = previewText.replace(/SOURCE/g, '.' + path + filename);
+        previewText = previewText.replace(/SOURCE/g, path + "/" + filename);
         previewText = previewText.replace(/TYPE/g, extension);
         if (extension === "m4a")
         {
