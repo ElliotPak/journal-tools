@@ -173,7 +173,45 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 	timeElement.append('<input class="inputText" value="' + text + '"></input>');
 	timeElement.append('<span class="textTimeEditSingleChar"> @</span>');
 	timeElement.append('<input class="inputTime" value="' + time + '"></input><br />');
+	timedCheckbox = $('<input type="checkbox" class="elementIsTimed" onchange="toggleTimeSettings(this)"></input>');
+	timeElement.append(timedCheckbox);
+	timeElement.append('<span class="textTimeEditNoclick">Is this timed?</span>');
+	if (isTimed)
+	{
+		console.log(timedCheckbox[0]);
+		timedCheckbox[0].checked = true;
+		toggleTimeSettings(timedCheckbox[0]);
+	}
 	timeElementContainer.append(timeElement);
+}
+
+/**
+ **/
+function toggleTimeSettings(checkbox)
+{
+	timeElement = $(checkbox).parent();
+	if (checkbox.checked)
+	{
+		timeElement.append('<div class="textTimeEditSeperator"></div><a href="#" onclick="jumpToTime(this)" class="textTimeEdit">Jump to this time</a>');
+		timeElement.append('<div class="textTimeEditSeperator"></div><a href="#" onclick="setToCurrentTime(this)" class="textTimeEdit">Set to current time</a>');
+	}
+	else
+	{
+		timeElement.find(".textTimeEditSeperator").remove();
+		timeElement.find(".textTimeEdit").remove();
+	}
+}
+
+/**
+ **/
+function jumpToTime(button)
+{
+}
+
+/**
+ **/
+function setToCurrentTime(button)
+{
 }
 
 /**
