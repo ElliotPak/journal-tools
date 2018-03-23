@@ -163,11 +163,11 @@ li {
 }
 
 .inputText {
-    width: 75%;
+    width: calc(100% - 135px);
 }
 
 .inputTime {
-    width: 7.5%;
+    width: 35px;
 }
 
 .inputDesc{
