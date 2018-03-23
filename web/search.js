@@ -282,19 +282,6 @@ function createTimeElementsArea(editNode, file)
 }
 
 /**
- * Creates a new span for a time element
- **/
-function displayNewTimeElement(thisList, element)
-{
-	newElement = $("<li></li>");
-	elementText = element.find(".inputText").val();
-	elementTime = element.find(".inputTime").val();
-	newElement.append('<span class="displayText">' + elementText + '</span>');
-	newElement.append('<span class="displayTimecode"> @' + elementTime + '</span>');
-	thisList.append(newElement);
-}
-
-/**
  * swap display file to editing mode: create editing elements and hide display
  * ones.
  **/
