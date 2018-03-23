@@ -169,7 +169,7 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 {
 	timeElementContainer = displayHalf.find(".timeElementContainer");
 	timeElement = $('<div class="timeElement"></div>');
-	timeElement.append('<a href="#deleteTE" class="textTimeEditSingleChar" onclick="deleteTimeElement(this)">x</a>');
+	timeElement.append('<a href="#deleteTE" class="textTimeEditSingleChar" onclick="deleteTimeElement(this)">x</a><span class="textTimeEditSingleChar"> </span>');
 	timeElement.append('<input class="inputText" value="' + text + '"></input>');
 	timeElement.append('<span class="textTimeEditSingleChar"> @</span>');
 	timeElement.append('<input class="inputTime" value="' + time + '"></input><br />');
@@ -213,8 +213,8 @@ function createTimeElementsArea(editNode, file)
 		timeElementContainer = $('<div class="timeElementContainer"></div>');
 		displayHalf.append(timeElementContainer);
 		populateTimeElementContainer(displayHalf, file, elementType[ii]);
-		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElementClick(this, false)">+' + elementType[ii] + '</a>');
-		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElementClick(this, true)">+' + elementType[ii] + ' at current time</a>');
+		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElementClick(this, false)">+' + elementType[ii] + '</a><div class="textTimeEditSeperator"></div>');
+		displayHalf.append('<a class="textTimeEdit" href="#createTE" onclick="plusTimeElementClick(this, true)">+' + elementType[ii] + ' at current time</a><div class="textTimeEditSeperator"></div>');
 		ii++;
 	});
 }

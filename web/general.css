@@ -229,6 +229,11 @@ li {
 	font-weight: bold;
 }
 
+.textTimeEditSeperator {
+	width: 20px;
+	display: inline-block;
+}
+
 .textTimeEditSingleChar {
 	font-size: 20px;
 	color: #444;
