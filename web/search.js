@@ -85,7 +85,7 @@ function makeTimeElementHtml(objects, type)
 	elementsTime = [];
 	objects.forEach( function(element) {
 		elText = '<span class="displayText">' + element.text + '</span>';
-		if (element.isTimed == "true")
+		if (element.isTimed === "true" || element.isTimed === true)
 		{
 			elText += '<a class="displayTimecode" href="#" onclick="jumpToTimecode(this)"> @' + element.time + '</a>';
 		}
