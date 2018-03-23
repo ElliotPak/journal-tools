@@ -145,7 +145,9 @@ function plusTimeElementClick(button, atCurrentTime)
 	if (atCurrentTime)
 	{
 		//will get current time later
-		createTimeElementDiv(displayHalf, "", 0, true);
+		preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+		currentTime = Math.floor(preview[0].currentTime);
+		button = createTimeElementDiv(displayHalf, "", currentTime, true);
 	}
 	else
 	{
@@ -181,6 +183,7 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 		toggleTimeSettings(timedCheckbox[0]);
 	}
 	timeElementContainer.append(timeElement);
+	return timeElement;
 }
 
 /**
