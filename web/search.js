@@ -87,7 +87,7 @@ function makeTimeElementHtml(objects, type)
 		elText = '<span class="displayText">' + element.text + '</span>';
 		if (element.isTimed == "true")
 		{
-			elText += '<span class="displayTimecode"> @' + element.time + '</span>';
+			elText += '<a class="displayTimecode" href="#" onclick="jumpToTimecode(this)"> @' + element.time + '</a>';
 		}
 		elementsTime.push(elText);
 	});
@@ -200,6 +200,17 @@ function toggleTimeSettings(checkbox)
 	{
 		timeElement.find(".textTimeEditSeperator").remove();
 		timeElement.find(".textTimeEdit").remove();
+	}
+}
+
+/**
+ **/
+function jumpToTimecode(button)
+{
+	preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+	if (preview.length > 0)
+	{
+		preview[0].currentTime = parseInt(button.innerHTML.substr(2));
 	}
 }
 
