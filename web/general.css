@@ -194,11 +194,18 @@ li {
 }
 
 .displayHalf {
-    width: calc(50% - 1px);
     height: 100%;
     padding: 10px 0px 20px 0px;
     float: left;
     display: inline-block;
+}
+
+.displayHalf.Tag {
+	width: calc(30% - 1px);
+}
+
+.displayHalf.Quote {
+	width: calc(70% - 1px);
 }
 
 .displayFilename {

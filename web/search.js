@@ -207,7 +207,7 @@ function createTimeElementsArea(editNode, file)
 	elementType = ["Tag", "Quote"];
 	ii = 0;
 	file.find(".halfContainer").children().each( function () {
-		displayHalf = $('<div class="displayHalf"></div>');
+		displayHalf = $('<div class="' + this.className + '"></div>');
 		halfContainer.append(displayHalf);
 		displayHalf.append('<span class="displaySubheader">' + elementType[ii] + 's:</span>');
 		timeElementContainer = $('<div class="timeElementContainer"></div>');
