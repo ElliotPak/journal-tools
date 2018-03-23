@@ -317,7 +317,7 @@ function getNewFileTimeElements(displayHalf)
 	$(displayHalf).find(".timeElementContainer > .timeElement").each( function() {
 		timeElement = {text: $(this).find(".inputText").val()};
 		timeElement.time = $(this).find(".inputTime").val();
-		timeElement.isTimed = false;
+		timeElement.isTimed = $(this).find(".elementIsTimed")[0].checked;
 		toReturn.push(timeElement);
 	});
 	return toReturn;
