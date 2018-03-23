@@ -25,23 +25,19 @@ function performSearch(button)
 	$("#results").empty();
 	input = $(button).parent().find("input");
 	settings = {term : input[0].value, searchtype: "tfnp"};
-	list = searchFiles(listOfFiles, settings);
-}
 
-/**
- * Returns a list of files that match the specified search terms
- **/
-function searchFiles(fileList, settings)
-{
 	resultList = [];
-	for (ii = 0; ii < fileList.length; ii++)
+	for (ii = 0; ii < listOfFiles.length; ii++)
 	{
-		if (doesFileMatch(fileList[ii], settings))
+		if (doesFileMatch(listOfFiles[ii], settings))
 		{
-			resultList.push(fileList[ii]);
+			resultList.push(listOfFiles[ii]);
 		}
 	}
-	return resultList;
+	for (var ii = 0; ii < resultList.length; ii++)
+	{
+		createFileDisplay(resultList[ii]);
+	}
 }
 
 /**
@@ -77,10 +73,6 @@ function doesFileMatch(file, settings)
 		}
 		jj++;
 	}
-	if (match === true)
-	{
-		createFileDisplay(file);
-	}
 	return match;
 }
 
@@ -88,18 +80,9 @@ function doesFileMatch(file, settings)
  * Creates spans for all time elements of each time element type for the 
  * specified file.
  **/
-function getTimeElementsHTML(node, type)
+function makeTimeElementHtml(objects, type)
 {
 	elementsTime = [];
-	objects = [];
-	if (type === "Tag")
-	{
-		objects = node.tags;
-	}
-	if (type === "Quote")
-	{
-		objects = node.quotes;
-	}
 	objects.forEach( function(element) {
 		elText = '<span class="displayText">' + element.text + '</span>';
 		if (element.time !== -1)
@@ -237,36 +220,6 @@ function createTimeElementsArea(editNode, file)
 }
 
 /**
- * Changes display text for a file's notes to the value in the note textarea
- **/
-function saveNoteTextarea(newFileJson, file)
-{
-	newNoteText = newFileJson.notes;
-	noteDisplaySelector = file.find(".noteContainer > .displayText");
-	
-	if (noteDisplaySelector.length != 0)
-	{
-		noteDisplaySelector.html(newNoteText);
-	}
-	if (newNoteText != "")
-	{
-		file.find(".noteContainer > .displaySubheader").html("Notes:");
-	}
-	else
-	{
-		file.find(".noteContainer > .displaySubheader").html("No notes.");
-	}
-}
-
-/**
- * Changes display text for a file's time elements to the value in the editable
- * ones
- **/
-function saveTimeElementsArea(editNode, file)
-{
-}
-
-/**
  * Creates a new span for a time element
  **/
 function displayNewTimeElement(thisList, element)
@@ -283,16 +236,16 @@ function displayNewTimeElement(thisList, element)
  * swap display file to editing mode: create editing elements and hide display
  * ones.
  **/
-function editFile(button)
+function swapFileToEdit(button)
 {
 	file = $(button.parentElement);
 	file.find(".editButton").hide();
 	file.find(".halfContainer").hide();
 	file.find(".noteContainer").hide();
 	editNode = $('<div class="editFile"></div>');
-	saveChangesButton = $('<button class="exitEditButton" onclick="goBackToFilePreview(this, true)">Save changes</button>');
+	saveChangesButton = $('<button class="exitEditButton" onclick="swapFileToPreview(this, true)">Save changes</button>');
 	saveChangesButton.insertBefore(file.find(".editButton")[0]);
-	discardChangesButton = $('<button class="exitEditButton" onclick="goBackToFilePreview(this, false)">Discard changes</button>');
+	discardChangesButton = $('<button class="exitEditButton" onclick="swapFileToPreview(this, false)">Discard changes</button>');
 	discardChangesButton.insertBefore(saveChangesButton);
 	editNode.insertBefore(file.find(".preview")[0]);
 	createTimeElementsArea(editNode, file);
@@ -309,7 +262,7 @@ function getNewFileJson(editNode)
 	newFilePathStr = editNode.parent().find(".displayTimecode.path").html();
 	newFile.path = newFilePathStr.replace(/Path: ?/g, "");
 	newFileTimeStr = editNode.parent().find(".displayTimecode.time").html();
-	newFile.time = parseTimeString(newFileTimeStr);
+	newFile.datetime = parseTimeString(newFileTimeStr);
 	newFile.notes = editNode.find(".notesBox").val();
 	displayHalfList = editNode.find(".halfContainer").children();
 	newFile.tags = getNewFileTimeElements(displayHalfList[0])
@@ -338,20 +291,24 @@ function getNewFileTimeElements(displayHalf)
 
 function replaceFileInList(file)
 {
-	for (var ii = 0; ii < listOfFiles.length; ii++)
+	ii = 0;
+	found = false;
+	while (ii < listOfFiles.length && !found)
 	{
 		iterFile = listOfFiles[ii];
 		if (file.path === iterFile.path && file.name === iterFile.name)
 		{
 			listOfFiles[ii] = file;
+			found = true;
 		}
+		ii++;
 	}
 }
 
 /**
  * destroy contents of editing elements and show display ones. optionally save
  **/
-function goBackToFilePreview(button, saveChanges)
+function swapFileToPreview(button, saveChanges)
 {
 	file = $(button.parentElement);
 	editNode = file.find(".editFile");
@@ -379,7 +336,7 @@ function createFileDisplayBase(file)
 {
 	displayNode = $('<div class="displayFile"></div>');
 	displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
-	displayNode.append('<button class="editButton" onclick="editFile(this)">Edit file</button><br />');
+	displayNode.append('<button class="editButton" onclick="swapFileToEdit(this)">Edit file</button><br />');
 
 	if (file.datetime !== null && typeof file.datetime !== "undefined")
 	{
@@ -416,7 +373,7 @@ function createFileDisplayTimeElements(displayNode, file)
 	displayNode.append(halfContainer);
 
 	halfTag = $('<div class="displayHalf Tag"></div>');
-	tags = getTimeElementsHTML(file, "Tag");
+	tags = makeTimeElementHtml(file.tags, "Tag");
 	if (tags.length > 0)
 	{
 		halfTag.append('<span class="displaySubheader">Tags:</span><br>');
@@ -434,7 +391,7 @@ function createFileDisplayTimeElements(displayNode, file)
 	halfContainer.append(halfTag);
 
 	halfQuote = $('<div class="displayHalf Quote"></div>');
-	quotes = getTimeElementsHTML(file, "Quote");
+	quotes = makeTimeElementHtml(file.quotes, "Quote");
 	if (quotes.length > 0)
 	{
 		halfQuote.append('<span class="displaySubheader">Quotes:</span><br>');
