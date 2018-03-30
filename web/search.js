@@ -88,7 +88,7 @@ function doesFileMatch(file, settings)
 }
 
 /**
- * Creates spans for all time elements of each time element type for the 
+ * Creates spans for all time elements of each time element type for the
  * specified file.
  **/
 function makeTimeElementHtml(objects, type)
@@ -390,7 +390,7 @@ function swapFileToPreview(button, saveChanges)
 }
 
 /**
- * 
+ *
  **/
 function createFileDisplayBase(file)
 {

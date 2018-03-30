@@ -91,7 +91,7 @@ def datetimeFromFilename(filenameFull):
                 found = True
             except ValueError:
                 pass
-    
+
     toRegexSearch = [
         ["%d.%m.%y %I.%M%p", r"([0-3]?\d)\.([0-1]?\d)\.(\d\d) ([0-1]?\d)\.([0-5]\d)(am|pm)"],
         ["%d %m %Y", r"([0-3]?\d)\.([0-1]?\d)\.(\d\d\d\d)"],
@@ -111,7 +111,7 @@ def datetimeFromFilename(filenameFull):
 
 def relocateFile(oldDir, newDir, filename):
     '''
-    Either moves or copies (based on shouldMove) file from newDir to oldDir. 
+    Either moves or copies (based on shouldMove) file from newDir to oldDir.
     Also creates newDir if it doesn't exist.
     '''
     oldDirFull = thisScriptPath() + "/" + oldDir
@@ -156,7 +156,7 @@ def getSortedFilename(filename):
 
 def formatNewFiles(fileList, path, filesSorted):
     '''
-    Renames all files in orderedFiles to their sorted filename. 
+    Renames all files in orderedFiles to their sorted filename.
     Sorted filename comes from getSortedFilename()
     '''
     for f in fileList:
@@ -171,9 +171,9 @@ def formatNewFiles(fileList, path, filesSorted):
 def sortTimeRecurse(path, filesSorted):
     '''
     Runs through all files in "path" and renames them based on the file time
-    that is retrieved through its name. 
-    Also calls itself on all folders in path. 
-    Returns the amount of files sorted.  
+    that is retrieved through its name.
+    Also calls itself on all folders in path.
+    Returns the amount of files sorted.
     '''
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
@@ -189,9 +189,9 @@ def sortTimeRecurse(path, filesSorted):
 
 def unsortRecurse(path, filesSorted):
     '''
-    Runs through all files in "path" and moves them back to Unsorted. 
-    Also calls itself on all folders in path. 
-    Returns the amount of files sorted.  
+    Runs through all files in "path" and moves them back to Unsorted.
+    Also calls itself on all folders in path.
+    Returns the amount of files sorted.
     '''
     fullPath = thisScriptPath() + "/" + path + "/"
     folderContents = os.listdir(fullPath)
@@ -223,7 +223,7 @@ def loadJsonDoc(filename):
 def sortDates():
     '''
     Moves (or copies) all files in /Unsorted to folders based on the date in
-    its filename. Folders are in YYYY/MM/DD format. 
+    its filename. Folders are in YYYY/MM/DD format.
     '''
 
     printStatus("=================================", True)
@@ -355,7 +355,7 @@ def compileTags():
         compileTagsInFolder(jsonDoc, "./" + ii, tagsCompiled)
     with open("tags.json", "w") as f:
         json.dump(jsonDoc, f)
-            
+
     tagsCompiledAmount = len(tagsCompiled[0])
     if tagsCompiledAmount > 0:
         printStatus("\nTag compiling done! " + str(tagsCompiledAmount) + " files compiled", True, "\n\n")
@@ -371,13 +371,13 @@ def finalMove():
     scriptPath = thisScriptPath()
     folderContents = os.listdir(scriptPath + "/Unsorted")
     rawFolder = scriptPath + "/Raw/" + datetime.datetime.now().strftime("%d.%m.%y %I.%M.%S%p").lower()
-    
+
     if not os.path.isdir(rawFolder):
         os.makedirs(rawFolder)
     for f in folderContents:
         if not args.nofiles:
             move(scriptPath + "/Unsorted/" + f, rawFolder)
-    
+
 def printResults(date, time, compile, unsorted, finalCopy):
     print("=================")
     print("||   SUMMARY:  ||")
@@ -418,11 +418,11 @@ def printResults(date, time, compile, unsorted, finalCopy):
             output.append("\nThe following tags were not compiled:")
             for ii in compile[1]:
                 output.append("    " + ii)
-    
+
     if args.summary:
         for a in output:
             print(a)
-    
+
     if args.summarytxt:
         summaryPath = thisScriptPath() + "/Summary/"
         if not os.path.exists(summaryPath):
@@ -481,6 +481,6 @@ if __name__ == "__main__":
     if args.summary or args.summarytxt:
         printResults(resultsDate, resultsTime, resultsCompile, resultsUnsorted, [])
         #printResults(resultsDate, resultsTime, resultsCompile, resultsFinalMove)
-    
+
     if len(sys.argv) != 1:
         print("\nAll operations completed!\n")
