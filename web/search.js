@@ -41,6 +41,17 @@ function performSearch(button)
 }
 
 /**
+ * displays all files
+ **/
+function displayAllFiles()
+{
+    for (ii = 0; ii < listOfFiles.length; ii++)
+    {
+        createFileDisplay(listOfFiles[ii]);
+    }
+}
+
+/**
  * Checks if the file matches the specified search terms
  **/
 function doesFileMatch(file, settings)
