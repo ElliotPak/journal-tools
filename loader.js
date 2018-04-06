@@ -1,4 +1,3 @@
-xmlDoc = null;
 jsonDoc = null;
 
 function loadJsonFile()
@@ -9,26 +8,6 @@ function loadJsonFile()
         dataType: "json",
         success: function(data) {
             jsonDoc = data;
-            if (typeof window.taggerLoaded != 'undefined')
-            {
-                startEditing($(data));
-            }
-            if (typeof window.searchLoaded != 'undefined')
-            {
-                startSearching($(data));
-            }
-        }
-    });
-}
-
-function loadXmlFile()
-{
-    $.ajax({
-        type: "GET",
-        url: "tags.xml",
-        dataType: "xml",
-        success: function(data) {
-            xmlDoc = data;
             if (typeof window.taggerLoaded != 'undefined')
             {
                 startEditing($(data));
