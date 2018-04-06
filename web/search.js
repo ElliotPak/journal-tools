@@ -320,7 +320,10 @@ function getNewFileJson(editNode)
 	newFile = {};
 	newFile.name = editNode.parent().find(".displayFilename").html();
 	newFilePathStr = editNode.parent().find(".displayTimecode.path").html();
-	newFile.path = newFilePathStr.replace(/Path: ?/g, "");
+    if (typeof newFilePathStr != "undefined")
+    {
+        newFile.path = newFilePathStr.replace(/Path: ?/g, "");
+    }
 	newFileTimeStr = editNode.parent().find(".displayTimecode.time").html();
 	newFile.datetime = parseTimeString(newFileTimeStr);
 	newFile.notes = editNode.find(".notesBox").val();
