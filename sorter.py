@@ -217,7 +217,7 @@ def loadJsonDoc(filename):
     if os.path.exists(thisScriptPath() + "/" + filename):
         obj = json.load(open(thisScriptPath() + "/" + filename))
     else:
-        obj = []        #because the thing is just a list
+        obj = {"length": 0}
     return obj
 
 def sortDates():
@@ -304,13 +304,14 @@ def isFileTagged(jsonDoc, teststr, datetimeInstead):
     for filename or datetime value
     '''
     isTagged = False
-    for ii in jsonDoc:
-        if datetimeInstead:
-            if ii["datetime"] == teststr:
-                isTagged = True
-        else:
-            if ii["name"] == teststr:
-                isTagged = True
+    for ii in jsonDoc.values():
+        if isinstance(ii, dict):
+            if datetimeInstead:
+                if ii["datetime"] == teststr:
+                    isTagged = True
+            else:
+                if ii["name"] == teststr:
+                    isTagged = True
     return isTagged
 
 def createJsonObj(filename):
@@ -337,7 +338,9 @@ def compileTagsInFolder(jsonDoc, path, tagsCompiled):
     for ii in glob.glob(path + "/**", recursive=True):
         if os.path.isfile(ii) and not isFileTagged(jsonDoc, os.path.basename(ii), datetimeInstead=False):
             thisObj = createJsonObj(ii)
-            jsonDoc.append(thisObj)
+            jsonDocLen = str(jsonDoc["length"])
+            jsonDoc[jsonDocLen] = thisObj
+            jsonDoc["length"] = int(jsonDocLen) + 1
             tagsCompiled[0].append(ii)
 
 def compileTags():
