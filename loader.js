@@ -23,8 +23,8 @@ function loadJsonFile()
 function saveFile(jsonfile)
 {
     jsonString = JSON.stringify(jsonfile);
-	console.log(jsonfile);
-	console.log(jsonString);
+    console.log(jsonfile);
+    console.log(jsonString);
     var blob=new Blob([jsonString],{type:'application/json;charset=utf-8'});
     saveAs(blob,'tags.json');
 }
