@@ -56,35 +56,41 @@ function displayAllFiles()
  **/
 function doesFileMatch(file, settings)
 {
-    match = false;
-    jj = 0
+    if (file.name !== null && typeof file.name != "undefined")
+    {
+        if (file.name.indexOf(settings.term) !== -1)
+        {
+            return true;
+        }
+    }
     if (file.notes !== null && typeof file.notes != "undefined")
     {
         if (file.notes.indexOf(settings.term) !== -1)
         {
-            match = true;
+            return true;
         }
     }
-    while (jj < file.tags.length && !match)
+    jj = 0;
+    while (jj < file.tags.length)
     {
         tagText = file.tags[jj].text;
         if (tagText.indexOf(settings.term) !== -1)
         {
-            match = true;
+            return true;
         }
         jj++;
     }
     jj = 0;
-    while (jj < file.quotes.length && !match)
+    while (jj < file.quotes.length)
     {
         tagText = file.quotes[jj].text;
         if (tagText.indexOf(settings.term) !== -1)
         {
-            match = true;
+            return true;
         }
         jj++;
     }
-    return match;
+    return false;
 }
 
 /**
