@@ -58,3 +58,19 @@ function createPreview(path, filename)
     }
     return nodeToReturn;
 }
+
+function loadSingleTextPreview(jsonFile, displayFile, funcOnSuccess)
+{
+    fullPath = jsonFile.path + '/' + jsonFile.name
+    rawFile = new XMLHttpRequest();
+    rawFile.open("GET", fullPath, true);
+    rawFile.onreadystatechange = function() {
+        rfstate = rawFile.readyState;
+        rfstatus = rawFile.status;
+        if (rfstate === 4 && (rfstatus === 200 || rfstatus === 0))
+        {
+            funcOnSuccess(jsonFile, displayFile, rawFile.responseText);
+        }
+    };
+    rawFile.send(null);
+}

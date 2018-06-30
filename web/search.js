@@ -2,10 +2,13 @@ searchLoaded = true;
 
 filesToDisplays = new Map();
 displaysToFiles = new Map();
+filesToContents = new Map();
 
 function startSearching(listOfFiles)
 {
     filesToDisplays = new Map();
+    displaysToFiles = new Map();
+    filesToContents = new Map();
     for (ii = 0; ii < listOfFiles.length; ii++)
     {
         file = listOfFiles[ii];
@@ -13,7 +16,52 @@ function startSearching(listOfFiles)
         filesToDisplays.set(file, displayFile);
         displaysToFiles.set(displayFile, file);
     }
+    loadTextPreviews()
     $("#buttonSave").css("visibility", "visible");
+}
+
+/**
+ * Returns true if str ends with any of the entries in arr
+ */
+function endsWithAny(str, arr)
+{
+    found = false;
+    arr.forEach(function(ii) {
+        if (str.endsWith(ii))
+        {
+            found = true;
+        }
+    });
+    return found;
+}
+
+/**
+ * For each text file, adds their contents to the display file, and also
+ * maps the JSON file representation to said contents.
+ */
+function loadTextPreviews()
+{
+    textFileExt = [".txt", ".md"];
+    for ([key, value] of filesToDisplays)
+    {
+        if (endsWithAny(key.name, textFileExt))
+        {
+            //its a text file
+            loadSingleTextPreview(key, value, applyTextPreview);
+        }
+    }
+}
+
+function applyTextPreview(jsonFile, displayFile, fileContents)
+{
+    filesToContents.set(jsonFile, fileContents);
+    halfContainer = displayFile.querySelector(".halfContainer");
+    displayFile.removeChild(halfContainer);
+    noteContainer = displayFile.querySelector(".noteContainer");
+    contents = document.createElement("span");
+    contents.className = "displayText";
+    contents.innerHTML = fileContents;
+    displayFile.insertBefore(contents, noteContainer);
 }
 
 /**
