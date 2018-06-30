@@ -1,10 +1,18 @@
 searchLoaded = true;
 
-listOfFiles = [];
+filesToDisplays = new Map();
+displaysToFiles = new Map();
 
-function startSearching(jsonNode)
+function startSearching(listOfFiles)
 {
-    listOfFiles = jsonNode;
+    filesToDisplays = new Map();
+    for (ii = 0; ii < listOfFiles.length; ii++)
+    {
+        file = listOfFiles[ii];
+        displayFile = makeDisplayFile(file);
+        filesToDisplays.set(file, displayFile);
+        displaysToFiles.set(displayFile, file);
+    }
     $("#buttonSave").css("visibility", "visible");
 }
 
@@ -13,6 +21,11 @@ function startSearching(jsonNode)
  **/
 function saveJsonFile()
 {
+    listOfFiles = [];
+    for ([key, value] of filesToDisplays)
+    {
+        listOfFiles.push(key);
+    }
     saveFile(listOfFiles);
 }
 
@@ -26,18 +39,15 @@ function performSearch(button)
     input = $(button).parent().find("input");
     settings = {term : input[0].value, searchtype: "tfnp"};
 
-    resultList = [];
-    for (ii = 0; ii < listOfFiles.length; ii++)
+    fragment = document.createDocumentFragment();
+    for ([key, value] of filesToDisplays)
     {
-        if (doesFileMatch(listOfFiles[ii], settings))
+        if (doesFileMatch(key, settings))
         {
-            resultList.push(listOfFiles[ii]);
+            fragment.appendChild(value);
         }
     }
-    for (var ii = 0; ii < resultList.length; ii++)
-    {
-        createFileDisplay(resultList[ii]);
-    }
+    document.getElementById("results").appendChild(fragment);
 }
 
 /**
@@ -45,10 +55,12 @@ function performSearch(button)
  **/
 function displayAllFiles()
 {
-    for (ii = 0; ii < listOfFiles.length; ii++)
+    fragment = document.createDocumentFragment();
+    for ([key, value] of filesToDisplays)
     {
-        createFileDisplay(listOfFiles[ii]);
+        fragment.appendChild(value);
     }
+    document.getElementById("results").appendChild(fragment);
 }
 
 /**
@@ -355,23 +367,16 @@ function getNewFileTimeElements(displayHalf)
 }
 
 /**
- * replaces specified file in listOfFiles
+ * replaces specified file in both file maps
  **/
 
-function replaceFileInList(file)
+function replaceFileInMaps(newFile, displayFile)
 {
-    ii = 0;
-    found = false;
-    while (ii < listOfFiles.length && !found)
-    {
-        iterFile = listOfFiles[ii];
-        if (file.path === iterFile.path && file.name === iterFile.name)
-        {
-            listOfFiles[ii] = file;
-            found = true;
-        }
-        ii++;
-    }
+    oldFile = displaysToFiles.get(displayFile);
+    displaysToFiles.delete(displayFile);
+    filesToDisplays.delete(oldFile);
+    displaysToFiles.set(displayFile, newFile);
+    filesToDisplays.set(newFile, displayFile);
 }
 
 /**
@@ -384,7 +389,7 @@ function swapFileToPreview(button, saveChanges)
     if (saveChanges)
     {
         newFileJson = getNewFileJson(editNode);
-        replaceFileInList(newFileJson);
+        replaceFileInMaps(newFileJson, file[0]);
         file.find(".halfContainer").remove();
         createFileDisplayTimeElements(file, newFileJson);
         file.find(".noteContainer").remove();
@@ -481,7 +486,7 @@ function createFileDisplayTimeElements(displayNode, file)
 /**
  * Create a div to display a file from its JSON representation
  **/
-function createFileDisplay(file)
+function makeDisplayFile(file)
 {
     displayNode = createFileDisplayBase(file);
     createFileDisplayTimeElements(displayNode, file);
@@ -490,6 +495,5 @@ function createFileDisplay(file)
     preview = createPreview(file.path, file.name);
     displayNode.append(preview);
 
-    $("#results").append(displayNode);
-    $("#results").append("<br>");
+    return displayNode[0];
 }
