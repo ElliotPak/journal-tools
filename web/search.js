@@ -4,7 +4,7 @@ filesToDisplays = new Map();
 displaysToFiles = new Map();
 filesToContents = new Map();
 
-function startSearching(listOfFiles)
+function setupSearch(listOfFiles)
 {
     filesToDisplays = new Map();
     displaysToFiles = new Map();
@@ -67,7 +67,7 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
 /**
  * saves the tags as json fille
  **/
-function saveJsonFile()
+function saveTags()
 {
     listOfFiles = [];
     for ([key, value] of filesToDisplays)
@@ -545,3 +545,5 @@ function makeDisplayFile(file)
 
     return displayNode[0];
 }
+
+window.onload = loadTags;
