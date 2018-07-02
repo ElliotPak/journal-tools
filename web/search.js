@@ -6,6 +6,7 @@ filesToContents = new Map();
 
 function setupSearch(listOfFiles)
 {
+    document.getElementById("results").innerHTML = ''
     filesToDisplays = new Map();
     displaysToFiles = new Map();
     filesToContents = new Map();
@@ -18,6 +19,8 @@ function setupSearch(listOfFiles)
     }
     loadTextPreviews()
     $("#buttonSave").css("visibility", "visible");
+    successDisplay = makeDisplayStatus("Load success!", "tags.json was successfully loaded.", "#E4E4FF");
+    document.getElementById("results").appendChild(successDisplay);
 }
 
 /**
@@ -222,7 +225,7 @@ function plusTimeElementClick(button, atCurrentTime)
     if (atCurrentTime)
     {
         //will get current time later
-        preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+        preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
         currentTime = Math.floor(preview[0].currentTime);
         button = createTimeElementDiv(displayHalf, "", currentTime, true);
     }
@@ -247,9 +250,9 @@ function createTimeElementDiv(displayHalf, text, time, isTimed)
 {
     timeElementContainer = displayHalf.find(".timeElementContainer");
     timeElement = $('<div class="timeElement"></div>');
-    timeElement.append('<a href="#deleteTE" class="textTimeEditSingleChar" onclick="deleteTimeElement(this)">x</a><span class="textTimeEditSingleChar"> </span>');
+    timeElement.append('<a href="#deleteTE" class="singleCharButton" onclick="deleteTimeElement(this)">x</a><span class="singleCharButton"> </span>');
     timeElement.append('<input class="inputText" value="' + text + '"></input>');
-    timeElement.append('<span class="textTimeEditSingleChar"> @</span>');
+    timeElement.append('<span class="singleCharButton"> @</span>');
     timeElement.append('<input class="inputTime" value="' + time + '"></input><br />');
     timedCheckbox = $('<input type="checkbox" class="elementIsTimed" onchange="toggleTimeSettings(this)"></input>');
     timeElement.append(timedCheckbox);
@@ -284,7 +287,7 @@ function toggleTimeSettings(checkbox)
  **/
 function jumpToTimecode(button)
 {
-    preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
     if (preview.length > 0)
     {
         preview[0].currentTime = parseInt(button.innerHTML.substr(2));
@@ -295,7 +298,7 @@ function jumpToTimecode(button)
  **/
 function jumpToTime(button)
 {
-    preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
     if (preview.length > 0)
     {
         thisTime = $(button).parent().find(".inputTime")[0].value;
@@ -307,7 +310,7 @@ function jumpToTime(button)
  **/
 function setToCurrentTime(button)
 {
-    preview = $(button).closest('div[class="displayFile"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
     if (preview.length > 0)
     {
         currentTime = Math.floor(preview[0].currentTime);
@@ -456,7 +459,7 @@ function swapFileToPreview(button, saveChanges)
  **/
 function createFileDisplayBase(file)
 {
-    displayNode = $('<div class="displayFile"></div>');
+    displayNode = $('<div class="displayObject"></div>');
     displayNode.append('<span class="displayFilename">' + $(file).attr("name") + '</span>');
     displayNode.append('<button class="editButton" onclick="swapFileToEdit(this)">Edit file</button><br />');
 
@@ -544,6 +547,45 @@ function makeDisplayFile(file)
     displayNode.append(preview);
 
     return displayNode[0];
+}
+
+/**
+ * Parses a string to a HTML element.
+ */
+function parseHTML(str)
+{
+    pParent = document.createElement('div');
+    pParent.innerHTML = str;
+    return pParent.firstChild;
+}
+
+function destroyParentElement(element)
+{
+    toDestroy = element.parentNode;
+    toDestroy.parentNode.removeChild(toDestroy);
+}
+
+/**
+ * Creates a div in the results to convey information.
+ */
+function makeDisplayStatus(title, contents, bgColour)
+{
+    statusContainer = parseHTML('<div class="displayObject" style="background-color:' + bgColour + ';"></div>');
+    titleSpan = parseHTML('<span class="displayFilename">' + title + '</span>');
+    quitButton = parseHTML('<a href="#" class="singleCharButton" style="float:right;" onclick="destroyParentElement(this)">x</a>');
+    statusContainer.appendChild(titleSpan);
+    statusContainer.appendChild(quitButton);
+    statusContainer.appendChild(document.createElement('br'));
+    if (typeof contents === "string")
+    {
+        contentsPara = parseHTML('<span class="displayText">' + contents + '</span>');
+        statusContainer.appendChild(contentsPara);
+    }
+    else
+    {
+        statusContainer.appendChild(contents);
+    }
+    return statusContainer;
 }
 
 window.onload = loadTags;

@@ -179,7 +179,7 @@ li {
     margin-right: 10%;
 }
 
-.displayFile {
+.displayObject {
     margin: 10px 20px;
     width: calc(100% - 60px);
     background-color: #E4E4E4;
@@ -248,7 +248,7 @@ li {
     display: inline-block;
 }
 
-.textTimeEditSingleChar {
+.singleCharButton {
     font-size: 20px;
     color: #444;
 }
