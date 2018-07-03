@@ -27,11 +27,12 @@ function setupSearch(listOfFiles)
         if (fileIsErrorFree(file, errors))
         {
             displayFile = makeDisplayFile(file);
+            addPreviewToFile(file, displayFile, errors);
+            addWarnings(file, errors);
             filesToDisplays.set(file, displayFile);
             displaysToFiles.set(displayFile, file);
         }
     }
-    loadTextPreviews()
     $("#buttonSave").css("visibility", "visible");
     loadStatus = makeLoadStatusMessages(errors);
     document.getElementById("results").appendChild(loadStatus);
@@ -52,7 +53,6 @@ function isInvalid(toTest)
 function fileIsErrorFree(file, errors)
 {
     isError = false;
-    isWarning = false;
     if (isInvalid(file.name))
     {
         isError = true;
@@ -69,16 +69,16 @@ function fileIsErrorFree(file, errors)
         errors.errorFiles.push(file);
         return false;
     }
+    return true;
+}
 
+function addWarnings(file, errors)
+{
+    isWarning = false;
     if (isInvalid(file.datetime))
     {
         isWarning = true;
         errors.noTime += 1;
-    }
-    if (!doesFileExist(file))
-    {
-        isWarning = true;
-        errors.noPreview += 1;
     }
     if (isWarning)
     {
@@ -89,13 +89,6 @@ function fileIsErrorFree(file, errors)
     {
         errors.fine += 1;
     }
-    return true;
-}
-
-function doesFileExist(file)
-{
-    //stubbed for now. not quite sure how to do this because of async
-    return true;
 }
 
 /**
@@ -176,16 +169,17 @@ function endsWithAny(str, arr)
  * For each text file, adds their contents to the display file, and also
  * maps the JSON file representation to said contents.
  */
-function loadTextPreviews()
+function addPreviewToFile(file, displayFile)
 {
     textFileExt = [".txt", ".md"];
-    for ([key, value] of filesToDisplays)
+    if (endsWithAny(file.name, textFileExt))
     {
-        if (endsWithAny(key.name, textFileExt))
-        {
-            //its a text file
-            loadSingleTextPreview(key, value, applyTextPreview);
-        }
+        //its a text file
+        loadPreview(file, displayFile, applyTextPreview, applyTextPreviewFailure, errors);
+    }
+    else
+    {
+        loadPreview(file, displayFile, applyOtherPreview, applyOtherPreviewFailure, errors);
     }
 }
 
@@ -193,12 +187,36 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
 {
     filesToContents.set(jsonFile, fileContents);
     halfContainer = displayFile.querySelector(".halfContainer");
-    displayFile.removeChild(halfContainer);
-    noteContainer = displayFile.querySelector(".noteContainer");
+    halfContainer.innerHTML = '';
     contents = document.createElement("span");
     contents.className = "displayText";
     contents.innerHTML = fileContents;
-    displayFile.insertBefore(contents, noteContainer);
+    halfContainer.appendChild(contents);
+}
+
+function applyTextPreviewFailure(displayFile, errors)
+{
+    filesToContents.set(jsonFile, fileContents);
+    halfContainer = displayFile.querySelector(".halfContainer");
+    halfContainer.innerHTML = '';
+    contents = document.createElement("span");
+    contents.className = "displayText italics";
+    contents.innerHTML = "The file couldn't be loaded.";
+    halfContainer.appendChild(contents);
+    errors.noPreview += 1;
+}
+
+function applyOtherPreview(jsonFile, displayFile, fileContents)
+{
+    previewNode = createPreview(jsonFile.path, jsonFile.name, errors);
+    displayFile.appendChild(previewNode);
+}
+
+function applyOtherPreviewFailure(displayFile, errors)
+{
+    previewNode = parseHTML('<span class="displayText italics">The preview couldn\'t be loaded. Does the file exist?</span>');
+    displayFile.appendChild(previewNode);
+    errors.noPreview += 1;
 }
 
 /**
@@ -676,9 +694,6 @@ function makeDisplayFile(file)
     displayNode = createFileDisplayBase(file);
     createFileDisplayTimeElements(displayNode, file);
     createFileDisplayNotes(displayNode, file);
-
-    preview = createPreview(file.path, file.name);
-    displayNode.append(preview);
 
     return displayNode[0];
 }

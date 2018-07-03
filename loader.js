@@ -19,7 +19,7 @@ function saveFile(jsonfile)
     saveAs(blob,'tags.json');
 }
 
-function createPreview(path, filename)
+function createPreview(path, filename, errors)
 {
     extension = filename.split('.').pop();
     previewText = "";
@@ -33,7 +33,7 @@ function createPreview(path, filename)
             previewText = '<video controls="" class="preview"><source src="SOURCE" type="video/TYPE" /></video>';
             break;
         case "jpg": case "png":
-            previewText = '<a src="SOURCE" target="_blank" >View image SOURCE</a>';
+            previewText = '<a class="displayText italics" target="_blank" href="SOURCE">View image: SOURCE</a>';
             break;
     }
     if (previewText != "")
@@ -44,23 +44,23 @@ function createPreview(path, filename)
         {
             previewText = previewText.replace("audio/m4a", "audio/mp4");
         }
-        nodeToReturn = $.parseHTML(previewText);
+        nodeToReturn = parseHTML(previewText);
     }
     return nodeToReturn;
 }
 
-function loadSingleTextPreview(jsonFile, displayFile, funcOnSuccess)
+function loadPreview(jsonFile, displayFile, funcOnSuccess, funcOnFail, errors)
 {
     fullPath = jsonFile.path + '/' + jsonFile.name
-    rawFile = new XMLHttpRequest();
-    rawFile.open("GET", fullPath, true);
-    rawFile.onreadystatechange = function() {
-        rfstate = rawFile.readyState;
-        rfstatus = rawFile.status;
-        if (rfstate === 4 && (rfstatus === 200 || rfstatus === 0))
-        {
-            funcOnSuccess(jsonFile, displayFile, rawFile.responseText);
+    $.ajax({
+        type: "GET",
+        url: fullPath,
+        dataType: "text",
+        success: function(data) {
+            funcOnSuccess(jsonFile, displayFile, data);
+        },
+        error: function(data) {
+            funcOnFail(displayFile, errors);
         }
-    };
-    rawFile.send(null);
+    });
 }
