@@ -1,7 +1,3 @@
-/*  Copyright 2014 gokoururi
-    This work is free. You can redistribute it and/or modify it under the
-    terms of the Do What The Fuck You Want To Public License, Version 2,
-    as published by Sam Hocevar. See the COPYING file for more details. */
 html {
     height: 100%;
     margin: 0;
@@ -149,9 +145,8 @@ li {
 }
 
 .preview {
-    margin: 30px 0 0;
+    margin: 15px 0 0;
     width: 100%;
-    height: 65%;
 }
 
 .timeElementContainer {
@@ -189,8 +184,9 @@ li {
 
 .halfContainer {
     display: inline-block;
-    width: 100%;
+    width: calc(100% - 20px);
     height: 100%;
+    margin: 10px;
 }
 
 .displayHalf {
@@ -263,3 +259,8 @@ li {
 
 .exitEditButton {
     float: right;
+}
+
+audio {
+    width: 100%;
+}

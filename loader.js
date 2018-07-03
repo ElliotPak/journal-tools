@@ -27,13 +27,13 @@ function createPreview(path, filename, errors)
     switch(extension)
     {
         case "mp3": case "m4a": case "aac":
-            previewText = '<audio controls="" class="preview"><source src="SOURCE" type="audio/TYPE" /></audio>';
+            previewText = '<audio controls=""><source src="SOURCE" type="audio/TYPE" /></audio>';
             break;
         case "mp4":
-            previewText = '<video controls="" class="preview"><source src="SOURCE" type="video/TYPE" /></video>';
+            previewText = '<video controls=""><source src="SOURCE" type="video/TYPE" /></video>';
             break;
         case "jpg": case "png":
-            previewText = '<a class="displayText italics" target="_blank" href="SOURCE">View image: SOURCE</a>';
+            previewText = '<a class="displayText italics" style="display:inline-block;" target="_blank" href="SOURCE">View image: SOURCE</a>';
             break;
     }
     if (previewText != "")

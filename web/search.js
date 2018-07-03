@@ -209,13 +209,17 @@ function applyTextPreviewFailure(displayFile, errors)
 function applyOtherPreview(jsonFile, displayFile, fileContents)
 {
     previewNode = createPreview(jsonFile.path, jsonFile.name, errors);
-    displayFile.appendChild(previewNode);
+    previewContainer = parseHTML('<div class="preview"></div>');
+    previewContainer.appendChild(previewNode);
+    displayFile.appendChild(previewContainer);
 }
 
 function applyOtherPreviewFailure(displayFile, errors)
 {
     previewNode = parseHTML('<span class="displayText italics">The preview couldn\'t be loaded. Does the file exist?</span>');
-    displayFile.appendChild(previewNode);
+    previewContainer = parseHTML('<div class="preview"></div>');
+    previewContainer.appendChild(previewNode);
+    displayFile.appendChild(previewContainer);
     errors.noPreview += 1;
 }
 
@@ -377,7 +381,7 @@ function plusTimeElementClick(button, atCurrentTime)
     if (atCurrentTime)
     {
         //will get current time later
-        preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
+        preview = $(button).closest('div[class="displayObject"]').find("audio");
         currentTime = Math.floor(preview[0].currentTime);
         button = createTimeElementDiv(displayHalf, "", currentTime, true);
     }
@@ -439,7 +443,7 @@ function toggleTimeSettings(checkbox)
  **/
 function jumpToTimecode(button)
 {
-    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio");
     if (preview.length > 0)
     {
         preview[0].currentTime = parseInt(button.innerHTML.substr(2));
@@ -450,7 +454,7 @@ function jumpToTimecode(button)
  **/
 function jumpToTime(button)
 {
-    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio");
     if (preview.length > 0)
     {
         thisTime = $(button).parent().find(".inputTime")[0].value;
@@ -462,7 +466,7 @@ function jumpToTime(button)
  **/
 function setToCurrentTime(button)
 {
-    preview = $(button).closest('div[class="displayObject"]').find("audio.preview");
+    preview = $(button).closest('div[class="displayObject"]').find("audio");
     if (preview.length > 0)
     {
         currentTime = Math.floor(preview[0].currentTime);
