@@ -10,17 +10,151 @@ function setupSearch(listOfFiles)
     filesToDisplays = new Map();
     displaysToFiles = new Map();
     filesToContents = new Map();
+    errors = {
+        errors : 0,
+        errorFiles : [],
+        noName : 0,
+        noPath: 0,
+        warnings : 0,
+        warningFiles : [],
+        noTime: 0,
+        noPreview: 0,
+        fine: 0
+    };
     for (ii = 0; ii < listOfFiles.length; ii++)
     {
         file = listOfFiles[ii];
-        displayFile = makeDisplayFile(file);
-        filesToDisplays.set(file, displayFile);
-        displaysToFiles.set(displayFile, file);
+        if (fileIsErrorFree(file, errors))
+        {
+            displayFile = makeDisplayFile(file);
+            filesToDisplays.set(file, displayFile);
+            displaysToFiles.set(displayFile, file);
+        }
     }
     loadTextPreviews()
     $("#buttonSave").css("visibility", "visible");
-    successDisplay = makeDisplayStatus("Load success!", "tags.json was successfully loaded.", "#E4E4FF");
-    document.getElementById("results").appendChild(successDisplay);
+    loadStatus = makeLoadStatusMessages(errors);
+    document.getElementById("results").appendChild(loadStatus);
+}
+
+/**
+ * Returns true if a variable is undefined, null, or an empty string
+ */
+function isInvalid(toTest)
+{
+    return typeof toTest === "undefined" || toTest === null || toTest === "";
+}
+
+/**
+ * Adds warnings and errors to the provided error object based on the file
+ * provided. Returns true if the error count for this file is 0.
+ */
+function fileIsErrorFree(file, errors)
+{
+    isError = false;
+    isWarning = false;
+    if (isInvalid(file.name))
+    {
+        isError = true;
+        errors.noName += 1;
+    }
+    if (isInvalid(file.path))
+    {
+        isError = true;
+        errors.noPath += 1;
+    }
+    if (isError)
+    {
+        errors.errors += 1;
+        errors.errorFiles.push(file);
+        return false;
+    }
+
+    if (isInvalid(file.datetime))
+    {
+        isWarning = true;
+        errors.noTime += 1;
+    }
+    if (!doesFileExist(file))
+    {
+        isWarning = true;
+        errors.noPreview += 1;
+    }
+    if (isWarning)
+    {
+        errors.warnings += 1;
+        errors.warningFiles.push(file);
+    }
+    else
+    {
+        errors.fine += 1;
+    }
+    return true;
+}
+
+function doesFileExist(file)
+{
+    //stubbed for now. not quite sure how to do this because of async
+    return true;
+}
+
+/**
+ * Creates status messages for load successes/failures, and returns the
+ * div for the status message.
+ */
+function makeLoadStatusMessages(errors)
+{
+    bgColour = "#E4E4FF";
+    if (errors.errors > 0)
+    {
+        bgColour = "#FFE4E4";
+    }
+    else if (errors.warnings > 0)
+    {
+        bgColour = "#FFF4E4";
+    }
+    contents = errors.fine + " entries loaded without error.";
+    if (errors.noName > 0)
+    {
+        contents = errors.noName + " entries couldn't be loaded due to lacking a name.\n" + contents;
+    }
+    if (errors.noPath > 0)
+    {
+        contents = errors.noPath + " entries couldn't be loaded due to lacking a path.\n" + contents;
+    }
+    if (errors.noTime > 0)
+    {
+        contents = errors.noTime + " entries were loaded but lack a date and time.\n" + contents;
+    }
+    if (errors.noPreview > 0)
+    {
+        contents = errors.noPreview + " entries were loaded but their corresponding files couldn't be found.\n" + contents;
+    }
+    return makeDisplayStatus("Tags file loaded!", contents, bgColour);
+}
+
+/**
+ * Creates a div in the results to convey information.
+ */
+function makeDisplayStatus(title, contents, bgColour)
+{
+    statusContainer = parseHTML('<div class="displayObject" style="background-color:' + bgColour + ';"></div>');
+    titleSpan = parseHTML('<span class="displayFilename">' + title + '</span>');
+    quitButton = parseHTML('<a href="#" class="singleCharButton" style="float:right;" onclick="destroyParentElement(this)">x</a>');
+    statusContainer.appendChild(titleSpan);
+    statusContainer.appendChild(quitButton);
+    statusContainer.appendChild(document.createElement('br'));
+    if (typeof contents === "string")
+    {
+        contents = contents.replace("\n", "<br />");
+        contentsPara = parseHTML('<span class="displayText">' + contents + '</span>');
+        statusContainer.appendChild(contentsPara);
+    }
+    else
+    {
+        statusContainer.appendChild(contents);
+    }
+    return statusContainer;
 }
 
 /**
@@ -563,29 +697,6 @@ function destroyParentElement(element)
 {
     toDestroy = element.parentNode;
     toDestroy.parentNode.removeChild(toDestroy);
-}
-
-/**
- * Creates a div in the results to convey information.
- */
-function makeDisplayStatus(title, contents, bgColour)
-{
-    statusContainer = parseHTML('<div class="displayObject" style="background-color:' + bgColour + ';"></div>');
-    titleSpan = parseHTML('<span class="displayFilename">' + title + '</span>');
-    quitButton = parseHTML('<a href="#" class="singleCharButton" style="float:right;" onclick="destroyParentElement(this)">x</a>');
-    statusContainer.appendChild(titleSpan);
-    statusContainer.appendChild(quitButton);
-    statusContainer.appendChild(document.createElement('br'));
-    if (typeof contents === "string")
-    {
-        contentsPara = parseHTML('<span class="displayText">' + contents + '</span>');
-        statusContainer.appendChild(contentsPara);
-    }
-    else
-    {
-        statusContainer.appendChild(contents);
-    }
-    return statusContainer;
 }
 
 window.onload = loadTags;
