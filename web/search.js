@@ -18,7 +18,6 @@ function setupSearch(listOfFiles)
         warnings : 0,
         warningFiles : [],
         noTime: 0,
-        noPreview: 0,
         fine: 0
     };
     for (ii = 0; ii < listOfFiles.length; ii++)
@@ -119,10 +118,6 @@ function makeLoadStatusMessages(errors)
     {
         contents = errors.noTime + " entries were loaded but lack a date and time.\n" + contents;
     }
-    if (errors.noPreview > 0)
-    {
-        contents = errors.noPreview + " entries were loaded but their corresponding files couldn't be found.\n" + contents;
-    }
     return makeDisplayStatus("Tags file loaded!", contents, bgColour);
 }
 
@@ -171,15 +166,25 @@ function endsWithAny(str, arr)
  */
 function addPreviewToFile(file, displayFile)
 {
-    textFileExt = [".txt", ".md"];
-    if (endsWithAny(file.name, textFileExt))
+    extText = ["txt", "md"];
+    extMedia = ["mp3", "m4a", "aac", "mp4"];
+    if (endsWithAny(file.name, extText))
     {
         //its a text file
-        loadPreview(file, displayFile, applyTextPreview, applyTextPreviewFailure, errors);
+        loadTextPreview(file, displayFile, applyTextPreview, applyTextPreviewFailure, errors);
     }
     else
     {
-        loadPreview(file, displayFile, applyOtherPreview, applyOtherPreviewFailure, errors);
+        previewNode = createOtherPreview(file.path, file.name);
+        previewContainer = parseHTML('<div class="preview"></div>');
+        previewContainer.appendChild(previewNode);
+        if (endsWithAny(file.name, extMedia))
+        {
+            previewNode.querySelector("source").onerror = function(e) {
+                replaceWithPreviewUnloadable(previewContainer);
+            };
+        }
+        displayFile.appendChild(previewContainer);
     }
 }
 
@@ -201,26 +206,14 @@ function applyTextPreviewFailure(displayFile, errors)
     halfContainer.innerHTML = '';
     contents = document.createElement("span");
     contents.className = "displayText italics";
-    contents.innerHTML = "The file couldn't be loaded.";
+    contents.innerHTML = "The text file couldn't be loaded.";
     halfContainer.appendChild(contents);
     errors.noPreview += 1;
 }
 
-function applyOtherPreview(jsonFile, displayFile, fileContents)
+function replaceWithPreviewUnloadable(preview)
 {
-    previewNode = createPreview(jsonFile.path, jsonFile.name, errors);
-    previewContainer = parseHTML('<div class="preview"></div>');
-    previewContainer.appendChild(previewNode);
-    displayFile.appendChild(previewContainer);
-}
-
-function applyOtherPreviewFailure(displayFile, errors)
-{
-    previewNode = parseHTML('<span class="displayText italics">The preview couldn\'t be loaded. Does the file exist?</span>');
-    previewContainer = parseHTML('<div class="preview"></div>');
-    previewContainer.appendChild(previewNode);
-    displayFile.appendChild(previewContainer);
-    errors.noPreview += 1;
+    preview.innerHTML = '<span class="displayText italics">The preview couldn\'t be loaded. Does the file exist?</span>';
 }
 
 /**

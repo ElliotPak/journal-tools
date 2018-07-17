@@ -19,7 +19,7 @@ function saveFile(jsonfile)
     saveAs(blob,'tags.json');
 }
 
-function createPreview(path, filename, errors)
+function createOtherPreview(path, filename)
 {
     extension = filename.split('.').pop();
     previewText = "";
@@ -35,6 +35,9 @@ function createPreview(path, filename, errors)
         case "jpg": case "png":
             previewText = '<a class="displayText italics" style="display:inline-block;" target="_blank" href="SOURCE">View image: SOURCE</a>';
             break;
+        default:
+            previewText = '<a class="displayText italics" style="display:inline-block;" target="_blank" href="SOURCE">View file: SOURCE</a>';
+            break;
     }
     if (previewText != "")
     {
@@ -49,7 +52,7 @@ function createPreview(path, filename, errors)
     return nodeToReturn;
 }
 
-function loadPreview(jsonFile, displayFile, funcOnSuccess, funcOnFail, errors)
+function loadTextPreview(jsonFile, displayFile, funcOnSuccess, funcOnFail, errors)
 {
     fullPath = jsonFile.path + '/' + jsonFile.name
     $.ajax({
