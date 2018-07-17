@@ -195,7 +195,7 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
     halfContainer.innerHTML = '';
     contents = document.createElement("span");
     contents.className = "displayText";
-    contents.innerHTML = fileContents;
+    contents.innerHTML = fileContents.replace("\n", "<br />");
     halfContainer.appendChild(contents);
 }
 
