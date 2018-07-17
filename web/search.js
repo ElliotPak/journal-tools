@@ -236,9 +236,7 @@ function saveTags()
 function performSearch(button)
 {
     $("#results").empty();
-    input = $(button).parent().find("input");
-    settings = {term : input[0].value, searchtype: "tfnp"};
-
+    settings = getSearchSettings();
     fragment = document.createDocumentFragment();
     for ([key, value] of filesToDisplays)
     {
@@ -248,6 +246,28 @@ function performSearch(button)
         }
     }
     document.getElementById("results").appendChild(fragment);
+}
+
+/**
+ * Returns an object representing the search's settings
+ */
+function getSearchSettings()
+{
+    input = document.getElementsByClassName("searchbar")[0];
+    settings = {term : input.value, searchtype: ""};
+
+    possibleSearches = "fpdtqnc";
+    for (ii = 0; ii < possibleSearches.length; ii++)
+    {
+        thisChar = possibleSearches.charAt(ii);
+        checkbox = document.getElementById("searchInclude" + thisChar.toUpperCase());
+        if (checkbox.checked)
+        {
+            settings.searchtype += thisChar;
+        }
+    }
+    console.log(settings.searchtype);
+    return settings;
 }
 
 /**
@@ -268,39 +288,62 @@ function displayAllFiles()
  **/
 function doesFileMatch(file, settings)
 {
-    if (file.name !== null && typeof file.name != "undefined")
+    if (settings.searchtype.includes("f") && betterStringContains(file.name, settings.term))
     {
-        if (file.name.indexOf(settings.term) !== -1)
+        return true;
+    }
+    if (settings.searchtype.includes("p") && betterStringContains(file.path, settings.term))
+    {
+        return true;
+    }
+    if (settings.searchtype.includes("d") && betterStringContains(file.datetime, settings.term))
+    {
+        return true;
+    }
+    if (settings.searchtype.includes("n") && betterStringContains(file.notes, settings.term))
+    {
+        return true;
+    }
+    if (settings.searchtype.includes("t"))
+    {
+        base = "";
+        for (ii = 0; ii < file.tags.length; ii++)
+        {
+            base += file.tags[ii].text + "\n";
+        }
+        if (betterStringContains(base, settings.term))
         {
             return true;
         }
     }
-    if (file.notes !== null && typeof file.notes != "undefined")
+    if (settings.searchtype.includes("q"))
     {
-        if (file.notes.indexOf(settings.term) !== -1)
+        base = "";
+        for (ii = 0; ii < file.quotes.length; ii++)
+        {
+            base += file.quotes[ii].text + "\n";
+        }
+        if (betterStringContains(base, settings.term))
         {
             return true;
         }
     }
-    jj = 0;
-    while (jj < file.tags.length)
+    if (settings.searchtype.includes("c"))
     {
-        tagText = file.tags[jj].text;
-        if (tagText.indexOf(settings.term) !== -1)
+        contents = filesToContents.get(file);
+        if (typeof contents !== "undefined" && betterStringContains(contents, settings.term))
         {
             return true;
         }
-        jj++;
     }
-    jj = 0;
-    while (jj < file.quotes.length)
+    return false;
+}
+
+function betterStringContains(base, toFind)
+{
+    if (base !== null && typeof base !== "undefined" && base.includes(toFind))
     {
-        tagText = file.quotes[jj].text;
-        if (tagText.indexOf(settings.term) !== -1)
-        {
-            return true;
-        }
-        jj++;
+        return true;
     }
     return false;
 }
