@@ -193,6 +193,7 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
     filesToContents.set(jsonFile, fileContents);
     halfContainer = displayFile.querySelector(".halfContainer");
     halfContainer.innerHTML = '';
+    halfContainer.className = 'preview text';
     contents = document.createElement("span");
     contents.className = "displayText";
     contents.innerHTML = fileContents.replace("\n", "<br />");
@@ -201,7 +202,6 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
 
 function applyTextPreviewFailure(displayFile, errors)
 {
-    filesToContents.set(jsonFile, fileContents);
     halfContainer = displayFile.querySelector(".halfContainer");
     halfContainer.innerHTML = '';
     contents = document.createElement("span");
@@ -616,10 +616,17 @@ function getNewFileTimeElements(displayHalf)
 function replaceFileInMaps(newFile, displayFile)
 {
     oldFile = displaysToFiles.get(displayFile);
+    contents = filesToContents.get(oldFile);
+
     displaysToFiles.delete(displayFile);
     filesToDisplays.delete(oldFile);
+    filesToContents.delete(oldFile);
     displaysToFiles.set(displayFile, newFile);
     filesToDisplays.set(newFile, displayFile);
+    if (contents != null)
+    {
+        filesToContents.set(newFile, contents);
+    }
 }
 
 /**
@@ -633,11 +640,21 @@ function swapFileToPreview(button, saveChanges)
     {
         newFileJson = getNewFileJson(editNode);
         replaceFileInMaps(newFileJson, file[0]);
-        file.find(".halfContainer").remove();
-        createFileDisplayTimeElements(file, newFileJson);
-        file.find(".noteContainer").remove();
-        createFileDisplayNotes(file, newFileJson);
-        file.append(file.find(".preview")[0]);
+        if (!filesToContents.has(newFileJson))
+        {
+            // this journal isn't text, so we need to recreate time elements
+            file.find(".halfContainer").remove();
+            createFileDisplayTimeElements(file, newFileJson);
+            file.find(".noteContainer").remove();
+            createFileDisplayNotes(file, newFileJson);
+            file.append(file.find(".preview")[0]);
+        }
+        else
+        {
+            // all we do for text files is create the new note container
+            file.find(".noteContainer").remove();
+            createFileDisplayNotes(file, newFileJson);
+        }
     }
     editNode.remove();
     file.find(".exitEditButton").remove();
