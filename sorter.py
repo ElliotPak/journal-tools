@@ -322,7 +322,7 @@ def createJsonObj(filename):
     thisFilename = os.path.basename(filename)
     thisPath = os.path.dirname(filename)
     thisObj = {"name": thisFilename, "path": thisPath}
-    thisDatetime = datetimeFromFilename(os.path.splitext(thisFilename)[0])
+    thisDatetime = datetimeFromFilename(thisFilename)
     if not thisDatetime == None:
        thisObj["datetime"] = thisDatetime.strftime("%Y%m%d%H%M")
     thisObj["tags"] = []
