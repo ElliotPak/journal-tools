@@ -134,7 +134,7 @@ function makeDisplayStatus(title, contents, bgColour)
     statusContainer.appendChild(document.createElement('br'));
     if (typeof contents === "string")
     {
-        contents = contents.replace("\n", "<br />");
+        contents = contents.replace(/\n/g, "<br />");
         contentsPara = parseHTML('<span class="displayText">' + contents + '</span>');
         statusContainer.appendChild(contentsPara);
     }
@@ -196,7 +196,7 @@ function applyTextPreview(jsonFile, displayFile, fileContents)
     halfContainer.className = 'preview text';
     contents = document.createElement("span");
     contents.className = "displayText";
-    contents.innerHTML = fileContents.replace("\n", "<br />");
+    contents.innerHTML = fileContents.replace(/\n/g, "<br />");
     halfContainer.appendChild(contents);
 }
 
