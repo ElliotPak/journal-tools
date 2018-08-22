@@ -254,7 +254,7 @@ function performSearch(button)
 function getSearchSettings()
 {
     input = document.getElementsByClassName("searchbar")[0];
-    settings = {term : input.value, searchtype: ""};
+    settings = {term : input.value, searchtype: "", includetypes: ""};
 
     possibleSearches = "fpdtqnc";
     for (ii = 0; ii < possibleSearches.length; ii++)
@@ -265,6 +265,12 @@ function getSearchSettings()
         {
             settings.searchtype += thisChar;
         }
+    }
+    if (document.getElementById("searchFromT").checked) {
+        settings.includetypes += "t";
+    }
+    if (document.getElementById("searchFromA").checked) {
+        settings.includetypes += "a";
     }
     console.log(settings.searchtype);
     return settings;
@@ -283,57 +289,68 @@ function displayAllFiles()
     document.getElementById("results").appendChild(fragment);
 }
 
+function isFileText(file) {
+    if (filesToContents.has(file)) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Checks if the file matches the specified search terms
  **/
 function doesFileMatch(file, settings)
 {
-    if (settings.searchtype.includes("f") && betterStringContains(file.name, settings.term))
+    if (settings.includetypes.includes("t") && isFileText(file) ||
+        settings.includetypes.includes("a") && !isFileText(file))
     {
-        return true;
-    }
-    if (settings.searchtype.includes("p") && betterStringContains(file.path, settings.term))
-    {
-        return true;
-    }
-    if (settings.searchtype.includes("d") && betterStringContains(file.datetime, settings.term))
-    {
-        return true;
-    }
-    if (settings.searchtype.includes("n") && betterStringContains(file.notes, settings.term))
-    {
-        return true;
-    }
-    if (settings.searchtype.includes("t"))
-    {
-        base = "";
-        for (ii = 0; ii < file.tags.length; ii++)
-        {
-            base += file.tags[ii].text + "\n";
-        }
-        if (betterStringContains(base, settings.term))
+        if (settings.searchtype.includes("f") && betterStringContains(file.name, settings.term))
         {
             return true;
         }
-    }
-    if (settings.searchtype.includes("q"))
-    {
-        base = "";
-        for (ii = 0; ii < file.quotes.length; ii++)
-        {
-            base += file.quotes[ii].text + "\n";
-        }
-        if (betterStringContains(base, settings.term))
+        if (settings.searchtype.includes("p") && betterStringContains(file.path, settings.term))
         {
             return true;
         }
-    }
-    if (settings.searchtype.includes("c"))
-    {
-        contents = filesToContents.get(file);
-        if (typeof contents !== "undefined" && betterStringContains(contents, settings.term))
+        if (settings.searchtype.includes("d") && betterStringContains(file.datetime, settings.term))
         {
             return true;
+        }
+        if (settings.searchtype.includes("n") && betterStringContains(file.notes, settings.term))
+        {
+            return true;
+        }
+        if (settings.searchtype.includes("t"))
+        {
+            base = "";
+            for (ii = 0; ii < file.tags.length; ii++)
+            {
+                base += file.tags[ii].text + "\n";
+            }
+            if (betterStringContains(base, settings.term))
+            {
+                return true;
+            }
+        }
+        if (settings.searchtype.includes("q"))
+        {
+            base = "";
+            for (ii = 0; ii < file.quotes.length; ii++)
+            {
+                base += file.quotes[ii].text + "\n";
+            }
+            if (betterStringContains(base, settings.term))
+            {
+                return true;
+            }
+        }
+        if (settings.searchtype.includes("c"))
+        {
+            contents = filesToContents.get(file);
+            if (typeof contents !== "undefined" && betterStringContains(contents, settings.term))
+            {
+                return true;
+            }
         }
     }
     return false;
