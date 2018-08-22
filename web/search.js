@@ -237,15 +237,94 @@ function performSearch(button)
 {
     $("#results").empty();
     settings = getSearchSettings();
-    fragment = document.createDocumentFragment();
+    resultsList = [];
     for ([key, value] of filesToDisplays)
     {
         if (doesFileMatch(key, settings))
         {
-            fragment.appendChild(value);
+            resultsList.push(key);
         }
     }
+    compareFunc = getCompareFunc();
+    filterFunc = getFilterFunc();
+    if (compareFunc !== null) {
+        resultsList = resultsList.filter(filterFunc);
+        resultsList.sort(compareFunc);
+    }
+    fragment = document.createDocumentFragment();
+    for (result of resultsList)
+    {
+        fragment.appendChild(filesToDisplays.get(result));
+    }
     document.getElementById("results").appendChild(fragment);
+}
+
+function getFilterFunc() {
+    selection = document.getElementById("sortSelection");
+    switch (selection.value) {
+        case "dateAsc":
+        case "dateDesc":
+            return sortDateFilter;
+        case "filenameAsc":
+        case "filenameDesc":
+            return sortFilenameFilter;
+    }
+    return null;
+}
+
+function getCompareFunc() {
+    selection = document.getElementById("sortSelection");
+    switch (selection.value) {
+        case "dateAsc":
+            return sortCompareDateAsc;
+        case "dateDesc":
+            return sortCompareDateDesc;
+        case "filenameAsc":
+            return sortCompareFilenameAsc;
+        case "filenameDesc":
+            return sortCompareFilenameDesc;
+    }
+    return null;
+}
+
+function sortCompareDateAsc(a, b) {
+    if (a.datetime < b.datetime)
+    {
+        return -1;
+    }
+    else if (a.datetime > b.datetime) {
+        return 1;
+    }
+    return 0
+}
+
+function sortCompareDateDesc(a, b)
+{
+    return -(sortCompareDateAsc(a, b));
+}
+
+function sortCompareFilenameAsc(a, b) {
+    if (a.name < b.name)
+    {
+        return -1;
+    }
+    else if (a.name > b.name) {
+        return 1;
+    }
+    return 0
+}
+
+function sortCompareFilenameDesc(a, b)
+{
+    return -(sortCompareFilenameAsc(a, b));
+}
+
+function sortDateFilter(file) {
+    return typeof file.datetime !== "undefined";
+}
+
+function sortFilenameFilter(file) {
+    return typeof file.name !== "undefined";
 }
 
 /**

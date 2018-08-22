@@ -34,6 +34,13 @@
                 <span class="sidebarText">Include notes</span><br />
                 <input type="checkbox" id="searchIncludeC" checked/>
                 <span class="sidebarText">Include contents</span><br />
+                <select id="sortSelection">
+                    <option value="none">Don't sort</option>
+                    <option value="dateAsc">Sort by date (ascending)</option>
+                    <option value="dateDesc">Sort by date (descending)</option>
+                    <option value="filenameAsc">Sort by filename (ascending)</option>
+                    <option value="filenameDesc">Sort by filename (descending)</option>
+                </select>
             </div>
             <div id="notSidebar">
                 <div id="results"></div>
