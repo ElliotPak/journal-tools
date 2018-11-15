@@ -303,16 +303,19 @@ def isFileTagged(jsonDoc, teststr, datetimeInstead):
     Returns true if the specified file exists within jsonDoc. Can either search
     for filename or datetime value
     '''
-    isTagged = False
-    for ii in jsonDoc.values():
+    iterator = jsonDoc
+    if isinstance(jsonDoc, dict):
+        # its a dict so we iterate over values
+        iterator = jsonDoc.values()
+    for ii in iterator:
         if isinstance(ii, dict):
             if datetimeInstead:
                 if ii["datetime"] == teststr:
-                    isTagged = True
+                    return True
             else:
                 if ii["name"] == teststr:
-                    isTagged = True
-    return isTagged
+                    return True
+    return False
 
 def createJsonObj(filename):
     '''
@@ -338,9 +341,14 @@ def compileTagsInFolder(jsonDoc, path, tagsCompiled):
     for ii in glob.glob(path + "/**", recursive=True):
         if os.path.isfile(ii) and not isFileTagged(jsonDoc, os.path.basename(ii), datetimeInstead=False):
             thisObj = createJsonObj(ii)
-            jsonDocLen = str(jsonDoc["length"])
-            jsonDoc[jsonDocLen] = thisObj
-            jsonDoc["length"] = int(jsonDocLen) + 1
+            if isinstance(jsonDoc, dict):
+                # we need to do this the annoying object way
+                jsonDocLen = str(jsonDoc["length"])
+                jsonDoc[jsonDocLen] = thisObj
+                jsonDoc["length"] = int(jsonDocLen) + 1
+            else:
+                # its a list so we just append
+                jsonDoc.append(thisObj)
             tagsCompiled[0].append(ii)
 
 def compileTags():
